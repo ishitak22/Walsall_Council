@@ -1,0 +1,58 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+#### Loading libraries
+
+```{r libraries, warning=FALSE}
+library(tidyverse) # general data analysis environment
+library(readxl)
+library(dplyr)
+library(ggplot2)
+```
+
+
+#### Census data household
+
+```{r, include=FALSE}
+census <- read_excel("Datasets/census_data_household.xlsx")
+house_sale <- read_excel("Datasets/ppd_data_headers.xlsx")
+```
+
+```{r change_columns}
+census <- census %>%
+  rename(
+    local_authorities_code = `Lower tier local authorities Code`,
+    local_authorities = `Lower tier local authorities`,
+    accommodation_type_code = `Accommodation by type of dwelling (9 categories) Code`,
+    accommodation_type = `Accommodation by type of dwelling (9 categories)`,
+    household_composition_code = `Household composition (6 categories) Code`,
+    household_composition = `Household composition (6 categories)`,
+    household_size_code = `Household size (5 categories) Code`,
+    household_size = `Household size (5 categories)`
+  )
+```
+
+```{r}
+print(paste('Dataframe contain', dim(census)[1], 'rows and', dim(census)[2], 'columns.'))
+print('Variables names are as follows:')
+print(names(census))
+head(census)
+```
+
+```{r}
+census <- census %>%
+  select(-c("local_authorities_code", "accommodation_type_code", "household_composition_code", "household_size_code"))
+
+summary(census)
+
+unique(census$household_composition)
+```
+
+```{r}
+census_plot_data <- select(census, -Observation)
+
+
+```
+
