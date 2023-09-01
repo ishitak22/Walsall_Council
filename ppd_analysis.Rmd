@@ -1,0 +1,75 @@
+
+## Loading libraries
+
+```{r libraries, warning=FALSE}
+library(tidyverse) # general data analysis environment
+library(readxl)
+library(dplyr)
+library(ggplot2)
+```
+
+## Loading the data
+
+```{r}
+house_sale <- read_excel("Datasets/ppd_data_headers.xlsx")
+```
+
+## Removing Unnecessary columns
+
+
+```{r}
+# Keep only the relevant columns
+relevant_columns <- c('unique_id', 'price_paid', 'deed_date', 'postcode', 'property_type', 'new_build', 'estate_type')
+house_sale <- house_sale %>%
+  select(all_of(relevant_columns))
+```
+
+## Handling missing values
+
+```{r}
+house_sale <- na.omit(house_sale, cols = "postcode")
+```
+
+# In-depth analysis
+
+```{r}
+# Summary statistics for price_paid
+summary(house_sale$price_paid)
+```
+
+```{r}
+# Histogram for price_paid
+house_sale$price_paid <- as.numeric(house_sale$price_paid)
+hist(house_sale$price_paid, main="Histogram of Price Paid", xlab="Price Paid", breaks=50)
+```
+
+```{r}
+# Convert deed_date to Date type
+house_sale$deed_date <- as.Date(house_sale$deed_date)
+
+# Plot trend
+library(ggplot2)
+ggplot(house_sale, aes(x=deed_date)) + 
+  geom_histogram(binwidth=30, fill="blue", alpha=0.7) +
+  ggtitle("Trend of Property Transactions Over Time") +
+  xlab("Deed Date") +
+  ylab("Frequency")
+
+```
+
+```{r}
+# Count of each property type
+table(house_sale$property_type)
+```
+
+```{r}
+# Count of new build vs. old build
+table(house_sale$new_build)
+```
+
+```{r}
+# Count of each estate type
+table(house_sale$estate_type)
+```
+
+
