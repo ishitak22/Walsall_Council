@@ -1,0 +1,270 @@
+```{r}
+library(readxl)
+library(ggplot2)
+```
+
+```{r}
+la_total <- read_excel("excel_datasets/detailed_LA_23_total.xlsx", sheet = 1)
+
+# Create a subset for the 8 traditional geographical regions
+traditional_regions <- c("North East", "North West", "Yorkshire and the Humber", "East Midlands", 
+                          "West Midlands", "East of England", "London", "South East", "South West")
+la_total_geo <- la_total[la_total$Area %in% traditional_regions, ]
+```
+
+```{r}
+print(summary(la_total))
+```
+
+```{r}
+# Initial Assessment by Area
+ggplot(la_total_geo, aes(x = Area, y = Initial_assessment)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ggtitle("Initial Assessment by Area")
+```
+
+```{r}
+# Prevention Duty by Area
+ggplot(la_total_geo, aes(x = Area, y = Prevention_duty)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ggtitle("Prevention Duty by Area")
+```
+
+```{r}
+# Relief Duty by Area
+ggplot(la_total_geo, aes(x = Area, y = Relief_duty)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ggtitle("Relief Duty by Area")
+```
+
+
+```{r}
+la_support <- read_excel("excel_datasets/detailed_LA_23_total.xlsx", sheet = 2)
+```
+
+```{r}
+geo_regions_support_needs <- la_support[la_support$Area %in% traditional_regions, ]
+```
+
+```{r}
+# Summary Statistics
+print("----- Summary Statistics for Geographical Regions -----")
+print(summary(geo_regions_support_needs))
+```
+
+```{r}
+# Household with No Support Needs by Geographical Regions
+ggplot(geo_regions_support_needs, aes(x = Area, y = household_no_support)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Household with No Support Needs by Geographical Regions")
+```
+
+ - Higher numbers may indicate areas where homelessness is less complicated by additional support needs.
+
+
+```{r}
+# Household with Unknown Support Needs by Geographical Regions
+ggplot(geo_regions_support_needs, aes(x = Area, y = household_unknown_support)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Household with Unknown Support Needs by Geographical Regions")
+```
+
+```{r}
+la_age <- read_excel("excel_datasets/detailed_LA_23_total.xlsx", sheet = 3)
+
+geo_regions_age_duty <- la_age[la_age$Area %in% traditional_regions, ]
+```
+
+```{r}
+# Homelessness by Age Groups (Under 16)
+ggplot(geo_regions_age_duty, aes(x = Area, y = 16-17)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Homelessness for Under 16 by Geographical Regions")
+```
+
+ - Regions with higher figures may need to focus on child and family services to address this issue.
+
+```{r}
+# Homelessness by Age Groups (18-24)
+ggplot(geo_regions_age_duty, aes(x = Area, y = `18-24`)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Homelessness for Age 18-24 by Geographical Regions")
+```
+
+ - These areas may require targeted youth programs.
+
+```{r}
+# Homelessness by Age Groups (25-44)
+ggplot(geo_regions_age_duty, aes(x = Area, y = `25-34`)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Homelessness for Age 25-44 by Geographical Regions")
+```
+
+ - This information is crucial for planning general homelessness interventions.
+ 
+```{r}
+la_referral <- read_excel("excel_datasets/detailed_LA_23_total.xlsx", sheet = 4)
+```
+ 
+```{r}
+geo_regions_referral_duty <- la_referral[la_referral$Area %in% traditional_regions, ]
+```
+ 
+```{r}
+# Total Households Referred by Geographical Regions
+ggplot(geo_regions_referral_duty, aes(x = Area, y = total_household)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Total Households Referred by Geographical Regions")
+```
+
+```{r}
+# Referrals from Adult Secure Estate (Prison) by Geographical Regions
+ggplot(geo_regions_referral_duty, aes(x = Area, y = `Adult_secure_estate(prison)`)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Referrals from Adult Secure Estate (Prison) by Geographical Regions")
+```
+
+ - This will indicate which regions have more referrals from prisons, potentially highlighting the need for better reintegration programs.
+
+
+```{r}
+# Referrals from National Probation Service by Geographical Regions
+ggplot(geo_regions_referral_duty, aes(x = Area, y = National_probation_service)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Referrals from National Probation Service by Geographical Regions")
+```
+
+ - Regions with higher numbers here may require more focused services for individuals on probation.
+
+```{r}
+# Referrals related to Mental Health by Geographical Regions
+ggplot(geo_regions_referral_duty, aes(x = Area, y = Mental_health)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Referrals related to Mental Health by Geographical Regions")
+```
+
+ - This can indicate the regions where mental health services may be most needed.
+
+
+```{r}
+# Referrals from Jobcentre Plus by Geographical Regions
+ggplot(geo_regions_referral_duty, aes(x = Area, y = Jobcentre_plus)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Referrals from Jobcentre Plus by Geographical Regions")
+```
+
+ - This will show which regions have more referrals from employment services, potentially indicating a link between unemployment and homelessness.
+ 
+ 
+```{r}
+la_ethnicity <- read_excel("excel_datasets/detailed_LA_23_total.xlsx", sheet = 5)
+```
+
+```{r}
+geo_regions_ethnicity_duty <- la_ethnicity[la_ethnicity$Area %in% traditional_regions, ]
+```
+
+```{r}
+# Homelessness Cases Identifying as British by Geographical Regions
+ggplot(geo_regions_ethnicity_duty, aes(x = Area, y = British)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Homelessness Cases Identifying as British by Geographical Regions")
+```
+
+```{r}
+# Homelessness Cases Identifying as Irish by Geographical Regions
+ggplot(geo_regions_ethnicity_duty, aes(x = Area, y = Irish)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Homelessness Cases Identifying as Irish by Geographical Regions")
+```
+
+```{r}
+# Homelessness Cases Identifying as Other White by Geographical Regions
+ggplot(geo_regions_ethnicity_duty, aes(x = Area, y = Other_white)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Homelessness Cases Identifying as Other White by Geographical Regions")
+```
+
+```{r}
+# Homelessness Cases Identifying as British African by Geographical Regions
+ggplot(geo_regions_ethnicity_duty, aes(x = Area, y = British_African)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Homelessness Cases Identifying as British African by Geographical Regions")
+```
+
+```{r}
+# Homelessness Cases Identifying as British Indian by Geographical Regions
+ggplot(geo_regions_ethnicity_duty, aes(x = Area, y = British_Indian)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Homelessness Cases Identifying as British Indian by Geographical Regions")
+```
+
+```{r}
+la_employment <- read_excel("excel_datasets/detailed_LA_23_total.xlsx", sheet = 6)
+```
+
+```{r}
+geo_regions_employment_duty <- la_employment[la_employment$Area %in% traditional_regions, ]
+```
+
+```{r}
+# Total Homelessness Cases by Employment Status by Geographical Regions
+ggplot(geo_regions_employment_duty, aes(x = Area, y = Total)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Total Homelessness Cases by Employment Status by Geographical Regions")
+```
+
+```{r}
+# Homelessness Cases Employed Full-time by Geographical Regions
+ggplot(geo_regions_employment_duty, aes(x = Area, y = Full_time)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Homelessness Cases Employed Full-time by Geographical Regions")
+```
+
+ - High numbers here could indicate a need for affordable housing or living wage initiatives.
+
+```{r}
+# Homelessness Cases Employed Part-time by Geographical Regions
+ggplot(geo_regions_employment_duty, aes(x = Area, y = Part_time)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Homelessness Cases Employed Part-time by Geographical Regions")
+```
+
+ - High numbers might indicate employment instability as a factor in homelessness.
+
+```{r}
+# Homelessness Cases who are Students by Geographical Regions
+ggplot(geo_regions_employment_duty, aes(x = Area, y = Student)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Homelessness Cases who are Students by Geographical Regions")
+```
+
+```{r}
+# Homelessness Cases who are Registered Unemployed by Geographical Regions
+ggplot(geo_regions_employment_duty, aes(x = Area, y = Registered_unemployed)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Homelessness Cases who are Registered Unemployed by Geographical Regions")
+```
+
+ - potentially requiring job training or employment programs.
+
+```{r}
+# Homelessness Cases who are Not Seeking Employment by Geographical Regions
+ggplot(geo_regions_employment_duty, aes(x = Area, y = Not_seeking)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Homelessness Cases who are Not Seeking Employment by Geographical Regions")
+```
+
+ - possibly pointing to other factors like illness or disability as the main issue.
+
+```{r}
+# Homelessness Cases who are Retired by Geographical Regions
+ggplot(geo_regions_employment_duty, aes(x = Area, y = Retired)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Homelessness Cases who are Retired by Geographical Regions")
+```
+
+ - This will show which regions have homelessness cases.
