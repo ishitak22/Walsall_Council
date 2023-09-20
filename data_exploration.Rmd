@@ -51,8 +51,6 @@ unique(census$household_composition)
 ```
 
 ```{r}
-census_plot_data <- select(census, -Observation)
-
-
+view(house_sale)
 ```
 
