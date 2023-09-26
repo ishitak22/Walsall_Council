@@ -28,5 +28,12 @@ model %>%
   layer_dense(units = 784, activation = 'sigmoid')
 ```
 
+```{r}
+# Compile the model
+model %>% compile(
+  loss = 'binary_crossentropy',
+  optimizer = 'adam'
+)
+```
 
 
