@@ -12,3 +12,21 @@ x_train <- mnist$train$x
 x_test <- mnist$test$x
 ```
 
+```{r}
+# Preprocess the data
+x_train <- x_train / 255
+x_test <- x_test / 255
+```
+
+- The preprocessing step where you divide the pixel values by 255 is essential for scaling the input data to a range between 0 and 1.
+
+```{r}
+# Define the autoencoder model
+model <- keras_model_sequential()
+model %>%
+  layer_dense(units = 128, activation = 'relu', input_shape = c(784)) %>%
+  layer_dense(units = 784, activation = 'sigmoid')
+```
+
+
+
