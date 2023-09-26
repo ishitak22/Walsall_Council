@@ -1,0 +1,14 @@
+```{r loading_libraries}
+library(keras) 
+library(ggplot2)
+```
+
+```{r loading_dataset}
+mnist <- dataset_mnist()
+```
+
+```{r}
+x_train <- mnist$train$x
+x_test <- mnist$test$x
+```
+
