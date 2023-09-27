@@ -22,6 +22,12 @@ x_test <- x_test / 255
 - The preprocessing step where you divide the pixel values by 255 is essential for scaling the input data to a range between 0 and 1.
 
 ```{r}
+# Flatten the input data
+x_train_flat <- array_reshape(x_train, c(dim(x_train)[1], 784))
+x_test_flat <- array_reshape(x_test, c(dim(x_test)[1], 784))
+```
+
+```{r}
 # Define the autoencoder model
 model <- keras_model_sequential()
 model %>%
@@ -40,10 +46,33 @@ model %>% compile(
 ```{r}
 # Train the autoencoder
 model %>% fit(
-  x_train, x_train,
+  x_train_flat, x_train_flat,
   epochs = 50,
   batch_size = 256,
   shuffle = TRUE,
-  validation_data = list(x_test, x_test)
+  validation_data = list(x_test_flat, x_test_flat)
 )
 ```
+
+```{r}
+# Encode and decode some digits using flattened test data
+encoded_imgs <- predict(model, x_test_flat)
+decoded_imgs <- encoded_imgs
+```
+
+```{r}
+# Display the original and reconstructed images
+library(ggplot2)
+n <- 10  # Number of digits to display
+par(mfrow=c(2,n), mar=c(1,1,1,1))
+for (i in 1:n) {
+  # Original Images
+  original_img <- matrix(x_test_flat[i,], nrow = 28)
+  image(original_img, col = gray.colors(256), axes = FALSE, main = "")
+  
+  # Reconstructed Images
+  reconstructed_img <- matrix(decoded_imgs[i,], nrow = 28)
+  image(reconstructed_img, col = gray.colors(256), axes = FALSE, main = "")
+}
+```
+
