@@ -1,5 +1,6 @@
 ```{r loading_libraries}
-library(keras) 
+library(keras)
+library(tensorflow)
 library(ggplot2)
 ```
 
@@ -36,4 +37,13 @@ model %>% compile(
 )
 ```
 
-
+```{r}
+# Train the autoencoder
+model %>% fit(
+  x_train, x_train,
+  epochs = 50,
+  batch_size = 256,
+  shuffle = TRUE,
+  validation_data = list(x_test, x_test)
+)
+```
