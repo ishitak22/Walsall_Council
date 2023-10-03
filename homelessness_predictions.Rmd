@@ -1,0 +1,176 @@
+```{r}
+library(tidyr)  # For converting to long format
+library(dplyr)  # For data manipulation
+library(readxl)  # For reading Excel files
+
+# Load the edited dataset
+data <- read_excel("Datasets/PE1_2009-2018.xlsx")
+
+# Identify columns that start with "20" and convert them to character
+data[grep("^20", names(data))] <- lapply(data[grep("^20", names(data))], as.character)
+
+# Convert to long format
+melted_data <- data %>%
+  pivot_longer(cols = starts_with("20"), names_to = "Year", values_to = "Homelessness Decisions") %>%
+  mutate(
+    # Extract the first 4 characters of 'Year' and convert to numeric
+    Year = as.numeric(substr(Year, 1, 4)),
+    # Convert 'Homelessness Decisions' to numeric
+    `Homelessness Decisions` = as.numeric(`Homelessness Decisions`)
+  ) %>%
+  # Handle errors in conversion, replacing them with NA
+  replace_na(list(`Homelessness Decisions` = NA))
+
+# View the first few rows of the melted data
+head(melted_data)
+```
+
+```{r}
+# Load necessary library
+library(ggplot2)  # For creating plots
+
+# Create a list of unique local authorities
+local_authorities <- unique(melted_data$`Local authority area`)
+
+# Create a function to plot the time series for each local authority
+plot_time_series <- function(authority) {
+  # Filter the data for the specific local authority
+  authority_data <- melted_data %>% filter(`Local authority area` == authority)
+  
+  # Create the plot
+  plot <- ggplot(authority_data, aes(x = Year, y = `Homelessness Decisions`)) +
+    geom_line() + 
+    geom_point() +
+    ggtitle(paste("Homelessness Decisions in", authority)) +
+    xlab("Year") +
+    ylab("Number of Homelessness Decisions") +
+    theme_minimal()
+  
+  return(plot)
+}
+
+# Apply the function to each local authority and display the plots
+lapply(local_authorities, plot_time_series)
+```
+
+```{r}
+# Calculate the average number of homelessness decisions for each local authority, excluding 'England'
+averages <- melted_data %>%
+  filter(`Local authority area` != 'ENGLAND') %>%
+  group_by(`Local authority area`) %>%
+  summarize(Average = mean(`Homelessness Decisions`, na.rm = TRUE)) %>%
+  arrange(desc(Average)) %>%
+  head(5)  # Select the top 5
+
+# Filter the data for the selected local authorities
+top_authorities_data <- melted_data %>% 
+  filter(`Local authority area` %in% averages$`Local authority area`)
+
+# Create the plot
+ggplot(top_authorities_data, aes(x = Year, y = `Homelessness Decisions`, color = `Local authority area`)) +
+  geom_line() +
+  geom_point() +
+  ggtitle("Top 5 Local Authorities by Average Number of Homelessness Decisions (Excluding England)") +
+  xlab("Year") +
+  ylab("Number of Homelessness Decisions") +
+  theme_minimal() +
+  theme(legend.position="bottom") +
+  scale_color_discrete(name = "Local Authority")
+```
+
+```{r}
+# Create a faceted plot for a subset of local authorities, for example, the top 10
+top_authorities_data <- melted_data %>% 
+  filter(`Local authority area` %in% 
+           (melted_data %>% 
+              filter(`Local authority area` != 'ENGLAND') %>%
+              group_by(`Local authority area`) %>%
+              summarize(Average = mean(`Homelessness Decisions`, na.rm = TRUE)) %>%
+              arrange(desc(Average)) %>%
+              head(10) %>%  # Select the top 10
+              pull(`Local authority area`)))
+
+ggplot(top_authorities_data, aes(x = Year, y = `Homelessness Decisions`)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~`Local authority area`, scales = 'free_y') +  # Create a separate facet for each local authority
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+```{r}
+# Highlight specific local authorities and make others transparent
+highlighted <- c("Some Authority 1", "Some Authority 2")  # Replace with the names of the local authorities you want to highlight
+
+ggplot(melted_data, aes(x = Year, y = `Homelessness Decisions`, color = `Local authority area` %in% highlighted)) +
+  geom_line(aes(alpha = `Local authority area` %in% highlighted)) +
+  geom_point(aes(alpha = `Local authority area` %in% highlighted)) +
+  scale_alpha_manual(values = c(0.2, 1)) +  # Adjust transparency levels as needed
+  theme_minimal() +
+  theme(legend.position="none")
+
+```
+
+```{r}
+# Plot the mean number of homelessness decisions per year across all local authorities
+mean_data <- melted_data %>%
+  group_by(Year) %>%
+  summarize(Mean = mean(`Homelessness Decisions`, na.rm = TRUE))
+
+ggplot(mean_data, aes(x = Year, y = Mean)) +
+  geom_line() +
+  geom_point() +
+  ggtitle("Mean Number of Homelessness Decisions per Year") +
+  theme_minimal()
+```
+
+```{r}
+library(plotly)
+
+# Create a ggplot object excluding 'ENGLAND'
+interactive_plot <- melted_data %>%
+  filter(`Local authority area` != 'ENGLAND') %>%
+  ggplot(aes(x = Year, y = `Homelessness Decisions`, color = `Local authority area`)) +
+  geom_line() +
+  theme_minimal() +
+  theme(legend.position="none")
+
+# Convert the ggplot object to an interactive plotly object
+plotly::ggplotly(interactive_plot)
+```
+
+```{r}
+library(forecast)
+```
+
+```{r}
+# Function to forecast for each local authority up to 2040
+forecast_for_authority <- function(authority) {
+  authority_data <- data_excluding_england %>% 
+    filter(`Local authority area` == authority) %>% 
+    select(Year, `Homelessness Decisions`)
+  
+  # Convert to time series
+  ts_data <- ts(authority_data$`Homelessness Decisions`, start = min(authority_data$Year), frequency = 1)
+  
+  # Fit ARIMA model
+  model <- auto.arima(ts_data)
+  
+  # Forecast up to 2040 (22 years from 2018)
+  forecasted <- forecast(model, h=22)
+  
+  return(forecasted$mean)
+}
+
+# Apply the function to each local authority
+predictions_2040 <- lapply(local_authorities, forecast_for_authority)
+names(predictions_2040) <- local_authorities
+
+```
+
+```{r}
+# For example, to view predictions for a specific local authority:
+predictions[["Barnet"]]
+```
+
