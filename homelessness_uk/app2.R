@@ -27,8 +27,10 @@ la_total_geo <- la_total[la_total$Area %in% traditional_regions, ]
 la_support <- read_excel("detailed_LA_23_total.xlsx", sheet = 2)
 geo_regions_support_needs <- la_support[la_support$Area %in% traditional_regions, ]
 
-la_age <- read_excel("excel_datasets/detailed_LA_23_total.xlsx", sheet = 3)
+la_age <- read_excel("detailed_LA_23_total.xlsx", sheet = 3)
 geo_regions_age_duty <- la_age[la_age$Area %in% traditional_regions, ]
+
+
 
 # Create the Shiny app UI
 ui <- navbarPage("Homelessness Decisions by Local Authority",
@@ -187,6 +189,12 @@ ui <- navbarPage("Homelessness Decisions by Local Authority",
                  tabPanel("Support Needs Analysis",
                           plotOutput("noSupportNeedsPlot"),
                           plotOutput("unknownSupportNeedsPlot")
+                 ),
+                 
+                 tabPanel("Homelessness by Age Group",
+                          selectInput("ageGroup", "Select Age Group:", 
+                                      choices = c("16-17", "18-24", "25-34", "35-44", "45-54", "55-64", "65-74", "75plus", "not_known")),
+                          plotOutput("agePlot")
                  )
 )
 
@@ -279,6 +287,24 @@ server <- function(input, output, session) {
       geom_bar(stat = "identity") +
       theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
       ggtitle("Household with Unknown Support Needs by Geographical Regions")
+  })
+  
+  output$agePlot <- renderPlot({
+    selected_age <- input$ageGroup
+    
+    ggplot(geo_regions_age_duty, aes(x = Area, y = get(selected_age))) +
+      geom_bar(stat = "identity") +
+      ggtitle(paste("Homelessness for Age", selected_age, "by Geographical Regions")) +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  })
+  
+  output$agePlot <- renderPlot({
+    selected_age <- input$ageGroup
+    
+    ggplot(geo_regions_age_duty, aes(x = Area, y = get(selected_age))) +
+      geom_bar(stat = "identity") +
+      ggtitle(paste("Homelessness for Age", selected_age, "by Geographical Regions")) +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
   })
   
 }
