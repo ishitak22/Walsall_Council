@@ -57,6 +57,9 @@ get_referral_description <- function(referral) {
 la_ethnicity <- read_excel("detailed_LA_23_total.xlsx", sheet = 5)
 geo_regions_ethnicity_duty <- la_ethnicity[la_ethnicity$Area %in% traditional_regions, ]
 
+la_employment <- read_excel("detailed_LA_23_total.xlsx", sheet = 6)
+geo_regions_employment_duty <- la_employment[la_employment$Area %in% traditional_regions, ]
+
 # Create the Shiny app UI
 ui <- navbarPage("Homelessness Decisions by Local Authority",
                  id = "navBar",
@@ -242,6 +245,15 @@ ui <- navbarPage("Homelessness Decisions by Local Authority",
                                                   "White_asian", "Other_multiple_ethnic_background", "Arab", 
                                                   "Other_ethnic_groups", "Unknown")),
                           plotOutput("ethnicityPlot")
+                 ),
+                 
+                 tabPanel("Employment Analysis",
+                          selectInput("employmentSelection", "Select Employment Status:", 
+                                      choices = c("Full_time", "Part_time", "Student", "Registered_unemployed", 
+                                                  "Not_registered_but_seeking", "Not_seeking", "Not_working_due_to_illness", 
+                                                  "Retired", "Other", "Unknown")),
+                          plotOutput("employmentPlot"),
+                          textOutput("employmentDescription")
                  )
 )
 
@@ -374,6 +386,35 @@ server <- function(input, output, session) {
       geom_bar(stat = "identity") +
       ggtitle(paste("Homelessness Cases Identifying as", selected_ethnicity, "by Geographical Regions")) +
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  })
+  
+  output$employmentPlot <- renderPlot({
+    selected_employment <- input$employmentSelection
+    
+    ggplot(geo_regions_employment_duty, aes(x = Area, y = get(selected_employment))) +
+      geom_bar(stat = "identity") +
+      ggtitle(paste("Homelessness Cases with Employment Status:", selected_employment, "by Geographical Regions")) +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  })
+  
+  get_employment_description <- function(employment) {
+    descriptions <- list(
+      Full_time = "High numbers here could indicate a need for affordable housing or living wage initiatives.",
+      Part_time = "High numbers might indicate employment instability as a factor in homelessness.",
+      Student = "High number might indicate students who are highly in debt because of their study fees and been homeless because they don't have any source of income",
+      Registered_unemployed = "These regions potentially require job training or employment programs.",
+      Not_registered_but_seeking = "High number indicates that they is so much difficulty in finding a job that people are homeless because of being unemployed even after getting good quality of education",
+      Not_seeking = "The high count in this category possibly points to other factors like illness or disability as the main issue.",
+      Not_working_due_to_illness = "High number gives us an idea as to where we need to invest more in terms of healthcare",
+      Retired = "This will show which regions have homelessness cases among retirees."
+      
+    )
+    
+    return(descriptions[[employment]])
+  }
+  
+  output$employmentDescription <- renderText({
+    get_employment_description(input$employmentSelection)
   })
   
 }
