@@ -30,7 +30,32 @@ geo_regions_support_needs <- la_support[la_support$Area %in% traditional_regions
 la_age <- read_excel("detailed_LA_23_total.xlsx", sheet = 3)
 geo_regions_age_duty <- la_age[la_age$Area %in% traditional_regions, ]
 
+la_referral <- read_excel("detailed_LA_23_total.xlsx", sheet = 4)
+geo_regions_referral_duty <- la_referral[la_referral$Area %in% traditional_regions, ]
 
+get_referral_description <- function(referral) {
+  switch(referral,
+         "Adult_secure_estate(prison)" = "This indicates which regions have more referrals from prisons, potentially highlighting the need for better reintegration programs.",
+         "Youth_secure_estate" = "This indicates which regions have more referrals from youth secure estates.",
+         "National_probation_service" = "Regions with higher numbers here may require more focused services for individuals on probation.",
+         "Community_rehabilition_company" = "This indicates regions with referrals from community rehabilitation companies.",
+         "Ugent_treatment_centres" = "Referrals from urgent treatment centers indicate regions where immediate medical attention was sought.",
+         "Mental_health" = "This can indicate the regions where mental health services may be most needed.",
+         "Jobcentre_plus" = "This will show which regions have more referrals from employment services, potentially indicating a link between unemployment and homelessness.",
+         "Adult_social_services" = "Regions with higher referrals from adult social services may indicate a need for more comprehensive social care programs.",
+         "Children_social_services" = "Referrals from children's social services highlight regions with potential vulnerabilities among younger populations.",
+         "Children_early_help" = "This indicates regions where early intervention services for children were sought.",
+         "Nil_resource_team" = "Referrals from the Nil resource team can provide insights into specific cases without external resource involvement.",
+         "State_of_defence" = "Regions with higher referrals from the state of defense may have populations involved in defense services.",
+         "Unknown" = "For unknown referrals, the source of the referral wasn't clearly identified.",
+         "household_referred_by_agency" = "Regions with more households referred by agencies can provide insights into the involvement of external organizations.",
+         "Household_referred_by_local_authority" = "This shows regions where local authorities have been actively referring households.",
+         "UNKNOWN REFERRAL"
+  )
+}
+
+la_ethnicity <- read_excel("detailed_LA_23_total.xlsx", sheet = 5)
+geo_regions_ethnicity_duty <- la_ethnicity[la_ethnicity$Area %in% traditional_regions, ]
 
 # Create the Shiny app UI
 ui <- navbarPage("Homelessness Decisions by Local Authority",
@@ -195,6 +220,28 @@ ui <- navbarPage("Homelessness Decisions by Local Authority",
                           selectInput("ageGroup", "Select Age Group:", 
                                       choices = c("16-17", "18-24", "25-34", "35-44", "45-54", "55-64", "65-74", "75plus", "not_known")),
                           plotOutput("agePlot")
+                 ),
+                 
+                 tabPanel("Referrals by Region",
+                          selectInput("referralSource", "Select Referral Source:", 
+                                      choices = c("Adult_secure_estate(prison)", "Youth_secure_estate", "National_probation_service", 
+                                                  "Community_rehabilition_company", "Ugent_treatment_centres", "Mental_health", 
+                                                  "Jobcentre_plus", "Adult_social_services", "Children_social_services", 
+                                                  "Children_early_help", "Nil_resource_team", "State_of_defence", "Unknown", 
+                                                  "household_referred_by_agency", "Household_referred_by_local_authority")),
+                          plotOutput("referralPlot"),
+                          textOutput("referralDescription")
+                 ),
+                 
+                 tabPanel("Ethnicity Analysis",
+                          selectInput("ethnicitySelection", "Select Ethnicity:", 
+                                      choices = c("British", "Irish", "Gypsy", "Other_white", "British_African", 
+                                                  "British_Caribbean", "Other_black", "British_pakistani", 
+                                                  "British_Indian", "British_Bangladeshi", "British_chinese", 
+                                                  "Other_asian", "White_black_caribbean", "White_black_african", 
+                                                  "White_asian", "Other_multiple_ethnic_background", "Arab", 
+                                                  "Other_ethnic_groups", "Unknown")),
+                          plotOutput("ethnicityPlot")
                  )
 )
 
@@ -304,6 +351,28 @@ server <- function(input, output, session) {
     ggplot(geo_regions_age_duty, aes(x = Area, y = get(selected_age))) +
       geom_bar(stat = "identity") +
       ggtitle(paste("Homelessness for Age", selected_age, "by Geographical Regions")) +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  })
+  
+  output$referralPlot <- renderPlot({
+    selected_referral <- input$referralSource
+    
+    ggplot(geo_regions_referral_duty, aes(x = Area, y = get(selected_referral))) +
+      geom_bar(stat = "identity") +
+      ggtitle(paste("Referrals from", selected_referral, "by Geographical Regions")) +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  })
+  
+  output$referralDescription <- renderText({
+    get_referral_description(input$referralSource)
+  })
+  
+  output$ethnicityPlot <- renderPlot({
+    selected_ethnicity <- input$ethnicitySelection
+    
+    ggplot(geo_regions_ethnicity_duty, aes(x = Area, y = get(selected_ethnicity))) +
+      geom_bar(stat = "identity") +
+      ggtitle(paste("Homelessness Cases Identifying as", selected_ethnicity, "by Geographical Regions")) +
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
   })
   
