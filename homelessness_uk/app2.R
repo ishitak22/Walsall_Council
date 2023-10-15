@@ -70,8 +70,6 @@ ui <- navbarPage("Homelessness Decisions by Local Authority",
                                       tags$li("Government initiatives aim to reduce and prevent homelessness, but challenges remain.")
                                     ),
                                     tags$p("Understanding the trends and patterns of homelessness is crucial for policymakers, social workers, and charities to make informed decisions and bring about positive change."),
-                                    
-                                    # Action button to navigate to the visualization
                                     actionButton("goto_visualization", "Go to Data Visualization")
                           )
                  ),
@@ -86,6 +84,72 @@ ui <- navbarPage("Homelessness Decisions by Local Authority",
                             
                             mainPanel(
                               plotOutput("authorityPlot")
+                            )
+                          )
+                 ),
+                 
+                 # Local Authorities Analysis
+                 tabPanel("Local Authorities Analysis",
+                          fluidPage(
+                            h1("Trend Analysis and Findings of Particular Local Authorities"),
+                            tags$br(),
+                            fluidRow(
+                              column(6,
+                                     tags$h2("1. Walsall:"),
+                                     tags$ul(
+                                       tags$li("- Initial Sharp Decline: Rapid improvements in conditions, such as effective housing policies, job opportunities, or social welfare programs, could have caused this decline."),
+                                       tags$li("- Stable Period with Minor Fluctuations: Homelessness levels remainedrelatively unchanged, suggesting steady conditions."),
+                                       tags$li("- Gradual Increase: Slowly worsening economic conditions, rising housing costs, or decreasing effectiveness of social programs might be factors.")
+                                     )
+                              ),
+                              column(6,
+                                     plotOutput("plotWalsall")
+                              )
+                            ),
+                            fluidRow(
+                              column(6,
+                                     tags$h2("2. Dudley:"),
+                                     tags$ul(
+                                       tags$li("- Initial decrease: In Dudley, there was a sudden downfall and then it was very stable and as we know it was because the homelessness was not reported in that time period."),
+                                       tags$li("- Stableness: After it is increased, it is back to where it started from so that means the homelessness is kind of stable other than the time period it was not recorded.")
+                                     )
+                              ),
+                              column(6,
+                                     plotOutput("plotDudley")
+                              )
+                            ),
+                            fluidRow(
+                              column(6,
+                                     tags$h2("3. Sandwell:"),
+                                     tags$ul(
+                                       tags$li("- Initial Decline: The decrease might suggest that policies or economic conditions were improving, leading to a reduction in homelessness."),
+                                       tags$li("- Sharp Increase: A sudden spike could indicate an economic crisis, policy changes, or a surge in housing costs.")
+                                     )
+                              ),
+                              column(6,
+                                     plotOutput("plotSandwell")
+                              )
+                            ),
+                            fluidRow(
+                              column(6,
+                                     tags$h2("4. Wolverhampton:"),
+                                     tags$ul(
+                                       tags$li("- Initial Decrease: The graph starts with a decline in homelessness. This suggests that conditions for vulnerable populations in Wolverhampton were improving during this period."),
+                                       tags$li("- Slight Increase: Towards the end, there's a minor uptick in homelessness, hinting at a potential deterioration in conditions.")
+                                     )
+                              ),
+                              column(6,
+                                     plotOutput("plotWolverhampton")
+                              )
+                            ),
+                            tags$br(),
+                            tags$h2("Potential Reasons for the Trend:"),
+                            tags$ul(
+                              tags$li("1. Economic Factors: Variations in homelessness often correlate with economic ups and downs. Economic downturns, recessions, or significant job losses can lead to an increase in homelessness."),
+                              tags$li("2. Housing Market Dynamics: The availability and affordability of housing play a pivotal role. An increase in rents or a lack of affordable housing options can lead to spikes in homelessness."),
+                              tags$li("3. Policy and Social Services: Changes in government policies related to housing, social welfare, and support services can have significant impacts. Effective policies can reduce homelessness, while changes or cuts in support can lead to increases."),
+                              tags$li("4. Social and Personal Factors: Issues like family breakdowns, mental health challenges, addiction, or lack of social support can contribute to homelessness."),
+                              tags$li("5. External Events: Natural disasters, large-scale industrial or business closures, or other significant events can disrupt communities and lead to temporary or long-term homelessness.")
                             )
                           )
                  )
@@ -110,6 +174,22 @@ server <- function(input, output, session) {
   
   output$authorityPlot <- renderPlot({
     plot_specific_authority(input$authorityInput)
+  })
+  
+  output$plotWalsall <- renderPlot({
+    plot_specific_authority("Walsall")
+  })
+  
+  output$plotDudley <- renderPlot({
+    plot_specific_authority("Dudley")
+  })
+  
+  output$plotSandwell <- renderPlot({
+    plot_specific_authority("Sandwell")
+  })
+  
+  output$plotWolverhampton <- renderPlot({
+    plot_specific_authority("Wolverhampton")
   })
   
   output$downloadPlot <- downloadHandler(
