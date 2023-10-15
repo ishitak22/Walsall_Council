@@ -17,6 +17,19 @@ melted_data <- data %>%
   ) %>%
   replace_na(list(`Homelessness Decisions` = NA))
 
+# Load Data
+la_total <- read_excel("detailed_LA_23_total.xlsx", sheet = 1)
+traditional_regions <- c("North East", "North West", "Yorkshire and the Humber", "East Midlands", 
+                         "West Midlands", "East of England", "London", "South East", "South West")
+la_total_geo <- la_total[la_total$Area %in% traditional_regions, ]
+
+# Load Data for Support Needs Analysis
+la_support <- read_excel("detailed_LA_23_total.xlsx", sheet = 2)
+geo_regions_support_needs <- la_support[la_support$Area %in% traditional_regions, ]
+
+la_age <- read_excel("excel_datasets/detailed_LA_23_total.xlsx", sheet = 3)
+geo_regions_age_duty <- la_age[la_age$Area %in% traditional_regions, ]
+
 # Create the Shiny app UI
 ui <- navbarPage("Homelessness Decisions by Local Authority",
                  id = "navBar",
@@ -27,23 +40,35 @@ ui <- navbarPage("Homelessness Decisions by Local Authority",
                    tags$style(HTML("
                      body {
                        font-family: 'Open Sans', sans-serif;
-                       background-color: #f4f4f4;
+                       background-color: #eaeaea;
                      }
                      .navbar {
                        background-color: #34495e;
                      }
-                     .navbar-default .navbar-nav > .active > a {
-                       background-color: #2c3e50;
+                     .navbar-default .navbar-nav > .active > a,
+                     .navbar-default .navbar-nav > li > a:hover {
+                       background-color: #5f2c82;
                        color: white;
                      }
-                     .intro-bg {
-                       background: linear-gradient(to right, #5f2c82, #49a09d);
-                       color: white;
-                       padding: 20px;
-                       border-radius: 15px;
+                     .btn-primary {
+                       background-color: #5f2c82;
+                       border-color: #5f2c82;
                      }
-                     button:hover {
+                     .btn-primary:hover {
                        background-color: #3e8e9d;
+                       border-color: #3e8e9d;
+                     }
+                     .sidebar {
+                       background-color: #ffffff;
+                       padding: 20px;
+                       border-radius: 5px;
+                     }
+                     .tab-content > .active {
+                       padding: 20px;
+                       background: linear-gradient(to right, #5f2c82, #3e8e9d);
+                       color: white;
+                       border-radius: 15px;
+                       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
                      }
                    "))
                  ),
@@ -152,6 +177,16 @@ ui <- navbarPage("Homelessness Decisions by Local Authority",
                               tags$li("5. External Events: Natural disasters, large-scale industrial or business closures, or other significant events can disrupt communities and lead to temporary or long-term homelessness.")
                             )
                           )
+                 ),
+                 # Tabs for each analysis
+                 tabPanel("Initial Assessment by Area", plotOutput("initialAssessmentPlot")),
+                 tabPanel("Prevention and Relief Duties by Area",
+                          plotOutput("preventionDutyPlot"),
+                          plotOutput("reliefDutyPlot")
+                 ),
+                 tabPanel("Support Needs Analysis",
+                          plotOutput("noSupportNeedsPlot"),
+                          plotOutput("unknownSupportNeedsPlot")
                  )
 )
 
@@ -205,6 +240,47 @@ server <- function(input, output, session) {
   observeEvent(input$goto_visualization, {
     updateNavbarPage(session, "navBar", selected = "Data Visualization")
   })
+  
+  
+  # Initial Assessment by Area
+  output$initialAssessmentPlot <- renderPlot({
+    ggplot(la_total_geo, aes(x = Area, y = Initial_assessment)) +
+      geom_bar(stat = "identity") +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+      ggtitle("Initial Assessment by Area")
+  })
+  
+  # Prevention Duty by Area
+  output$preventionDutyPlot <- renderPlot({
+    ggplot(la_total_geo, aes(x = Area, y = Prevention_duty)) +
+      geom_bar(stat = "identity") +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+      ggtitle("Prevention Duty by Area")
+  })
+  
+  # Relief Duty by Area
+  output$reliefDutyPlot <- renderPlot({
+    ggplot(la_total_geo, aes(x = Area, y = Relief_duty)) +
+      geom_bar(stat = "identity") +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+      ggtitle("Relief Duty by Area")
+  })
+  
+  # Support Needs Analysis Plots
+  output$noSupportNeedsPlot <- renderPlot({
+    ggplot(geo_regions_support_needs, aes(x = Area, y = household_no_support)) +
+      geom_bar(stat = "identity") +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+      ggtitle("Household with No Support Needs by Geographical Regions")
+  })
+  
+  output$unknownSupportNeedsPlot <- renderPlot({
+    ggplot(geo_regions_support_needs, aes(x = Area, y = household_unknown_support)) +
+      geom_bar(stat = "identity") +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+      ggtitle("Household with Unknown Support Needs by Geographical Regions")
+  })
+  
 }
 
 shinyApp(ui = ui, server = server)
