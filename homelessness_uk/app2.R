@@ -68,9 +68,20 @@ house_sale <- house_sale %>%
   select(all_of(relevant_columns))
 house_sale <- na.omit(house_sale, cols = "postcode")
 
+# Extract year from the deed_date
+house_sale$year <- as.numeric(format(house_sale$deed_date, "%Y"))
+
+# Calculate average price by year
+avg_price_by_year <- aggregate(price_paid ~ year, data=house_sale, FUN=mean)
+
+# Calculate total homelessness decisions by year
+total_homelessness_by_year <- aggregate(`Homelessness Decisions` ~ Year, data=melted_data, FUN=sum)
+
 # Create the Shiny app UI
 ui <- navbarPage("Homelessness Decisions by Local Authority",
                  id = "navBar",
+                 
+                 tags$head(tags$script(src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML")),
                  
                  # Adding custom styles
                  tags$head(
@@ -115,6 +126,7 @@ ui <- navbarPage("Homelessness Decisions by Local Authority",
                  tabPanel("Introduction", 
                           fluidPage(class = "intro-bg",
                                     h1("Homelessness in the UK"),
+                                    tags$img(src = "homelessness_bg.jpg", width = "60%"),
                                     tags$p("Homelessness is a pressing issue in the UK, encompassing a range of situations from rough sleeping to living in temporary accommodations. Over the years, the number of people experiencing homelessness has seen fluctuations, influenced by various economic, social, and political factors."),
                                     tags$ul(
                                       tags$li(tags$b("Rough Sleeping:"), "This is the most visible form of homelessness, referring to people who sleep on the streets, in doorways, parks, or other places not meant for habitation."),
@@ -264,16 +276,70 @@ ui <- navbarPage("Homelessness Decisions by Local Authority",
                           textOutput("employmentDescription")
                  ),
                  
-                 tabPanel("Top Local Authorities",
-                          plotlyOutput("topAuthoritiesPlot"),  # First plot
-                          plotlyOutput("facetedAuthoritiesPlot"),  # Second, faceted plot
-                          plotlyOutput("meanHomelessnessPlot")  # Third, mean homelessness plot
+                 tabPanel("Property Price vs Homelessness",
+                          plotOutput("priceVsHomelessnessPlot")
                  ),
                  
-                 tabPanel("Homelessness vs Property Prices",
-                          plotlyOutput("homelessnessVsPropertyPricesPlot")
+                 tabPanel("Koopman Theory & Research",
+                          tabsetPanel(
+                            tabPanel("Motivation",
+                                     h2("Why Predict Homelessness?"),
+                                     tags$ul(
+                                       tags$li("Predicting homelessness allows us to focus on prevention."),
+                                       tags$li("Efficient resource allocation for social services and housing programs."),
+                                       tags$li("Reduces economic burden on healthcare, emergency services, and the criminal justice system."),
+                                       tags$li("Positions the UK as a global leader in social policy."),
+                                       tags$li("Improves lives by ensuring opportunities for stable housing, health, education, and employment.")
+                                     )
+                            ),
+                            tabPanel("Traditional Approaches",
+                                     h2("Regression-based Analysis"),
+                                     tags$ul(
+                                       tags$li("Given, at time step (year), we can represent homelessness decisions as a function of year and factors like 'Local Authority Regions'."),
+                                       tags$li("Regression often makes assumptions about data linearity, homoscedasticity, normality, and independence."),
+                                       tags$li("Regression models might ignore the temporal nature of data.")
+                                     )
+                            ),
+                            
+                            tabPanel("Deep Learning Success",
+                                     h2("The Rise of Deep Learning"),
+                                     tags$p("With advancements in computational capabilities and data abundance, neural networks have become state-of-the-art for prediction tasks, including time-series predictions using architectures like RNNs.")
+                            ),
+                            tabPanel("Koopman Theory",
+                                     h2("Understanding the Koopman Theory"),
+                                     tags$p("The discrete mapping between the target variable can be represented as:"),
+                                     tags$div(HTML("$$ yt+1 = F(yt) $$")),
+                                     tags$p("Where \\( F( \\cdot ) \\) is a non-linear function mapping which is usually unknown."),
+                                     tags$p("Lifting operation to represent in linear space using an observable function \\( \\phi( \\cdot ) \\), which gives:"),
+                                     tags$div(HTML("$$ zt = \\phi(yt) \\in \\mathbb{R}^k $$")),
+                                     tags$p("Where \\( k \\) can be infinite dimensional long."),
+                                     tags$p("The mapping can be given using a linear operation:"),
+                                     tags$div(HTML("$$ zt+1 = K zt $$")),
+                                     tags$p("Where \\( K \\) is the Koopman Operator."),
+                                     tags$p("Finally, for predictions:"),
+                                     tags$div(HTML("$$ \\hat{y}_{t+1} = \\phi^{-1}(K\\phi(yt)) $$")),
+                                     tags$div(HTML("$$ \\hat{y}_{t+2} = \\phi^{-1}(K^2\\phi(yt)) $$")),
+                                     tags$p("And so on..."),
+                                     tags$div(HTML("$$ \\hat{y}_{t+T} = \\phi^{-1}(K^T\\phi(yt)) $$")),
+                                     tags$p("We can exploit the property of linearity to make multi-time step predictions.")
+                            ),
+                            tabPanel("Koopman Autoencoder",
+                                     h2("Neural Network Approach for Koopman"),
+                                     tags$p("The Koopman Autoencoder (KAE) uses an Encoder and Decoder approach."),
+                                     tags$img(src = "path_to_KAE_image_from_PDF.png") 
+                            ),
+                            tabPanel("Training KAE",
+                                     h2("Training the Koopman Autoencoder"),
+                                     tags$p("Training considers multiple loss functions, including reconstruction loss, linearity loss, and prediction loss.")
+                            ),
+                            tabPanel("Use-cases",
+                                     h2("Applications of Koopman Autoencoder"),
+                                     tags$img(src = "path_to_SEA_image_from_PDF.png", width = "60%", height = "60%") 
+                            )
+                          )
                  )
 )
+                 
 
 # Server function
 server <- function(input, output, session) {
@@ -502,30 +568,20 @@ server <- function(input, output, session) {
     ggplotly(p)
   })
   
-  output$homelessnessVsPropertyPricesPlot <- renderPlotly({
-    # Extract year from deed_date
-    house_sale$year <- format(house_sale$deed_date, "%Y")
+  output$priceVsHomelessnessPlot <- renderPlot({
+    # Join the two datasets
+    combined_data <- merge(avg_price_by_year, total_homelessness_by_year, by.x="year", by.y="Year")
     
-    # Calculate average price by year
-    avg_price_by_year <- aggregate(price_paid ~ year, data=house_sale, FUN=mean)
-    avg_price_by_year$year <- as.numeric(avg_price_by_year$year)
-    
-    # Calculate the mean homelessness decisions per year
-    mean_homelessness_by_year <- melted_data %>%
-      group_by(Year) %>%
-      summarize(Mean = mean(`Homelessness Decisions`, na.rm = TRUE))
-    
-    # Combine the datasets based on year
-    combined_data <- left_join(mean_homelessness_by_year, avg_price_by_year, by = c("Year" = "year"))
-    
-    # Create a basic plot with homelessness decisions
-    p <- plot_ly(combined_data, x = ~Year, y = ~Mean, type = 'scatter', mode = 'lines+markers', name = 'Homelessness Decisions', line = list(color = 'blue'))
-    
-    # Add the property prices as a secondary y-axis
-    p <- p %>% add_trace(y = ~price_paid, name = 'Average Property Price', line = list(color = 'red')) %>%
-      layout(yaxis2 = list(overlaying = "y", side = "right"))
-    
-    return(p)
+    ggplot(combined_data) +
+      geom_line(aes(x=year, y=price_paid, color="Average Property Price")) +
+      geom_line(aes(x=year, y=`Homelessness Decisions`, color="Total Homelessness Decisions")) +
+      geom_point(aes(x=year, y=price_paid)) +
+      geom_point(aes(x=year, y=`Homelessness Decisions`)) +
+      ggtitle("Average Property Price vs Total Homelessness by Year") +
+      xlab("Year") +
+      ylab("Value") +
+      scale_y_continuous(sec.axis = sec_axis(~., name = "Total Homelessness Decisions")) +
+      theme_minimal()
   })
   
 }
