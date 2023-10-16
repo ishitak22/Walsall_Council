@@ -61,6 +61,13 @@ geo_regions_ethnicity_duty <- la_ethnicity[la_ethnicity$Area %in% traditional_re
 la_employment <- read_excel("detailed_LA_23_total.xlsx", sheet = 6)
 geo_regions_employment_duty <- la_employment[la_employment$Area %in% traditional_regions, ]
 
+house_sale <- read_excel("ppd_data_headers.xlsx")
+# Keep only the relevant columns
+relevant_columns <- c('unique_id', 'price_paid', 'deed_date', 'postcode', 'property_type', 'new_build', 'estate_type')
+house_sale <- house_sale %>%
+  select(all_of(relevant_columns))
+house_sale <- na.omit(house_sale, cols = "postcode")
+
 # Create the Shiny app UI
 ui <- navbarPage("Homelessness Decisions by Local Authority",
                  id = "navBar",
@@ -259,7 +266,12 @@ ui <- navbarPage("Homelessness Decisions by Local Authority",
                  
                  tabPanel("Top Local Authorities",
                           plotlyOutput("topAuthoritiesPlot"),  # First plot
-                          plotlyOutput("facetedAuthoritiesPlot")  # Second, faceted plot
+                          plotlyOutput("facetedAuthoritiesPlot"),  # Second, faceted plot
+                          plotlyOutput("meanHomelessnessPlot")  # Third, mean homelessness plot
+                 ),
+                 
+                 tabPanel("Homelessness vs Property Prices",
+                          plotlyOutput("homelessnessVsPropertyPricesPlot")
                  )
 )
 
@@ -472,6 +484,48 @@ server <- function(input, output, session) {
     
     # Convert ggplot object to a plotly object
     ggplotly(p)
+  })
+  
+  output$meanHomelessnessPlot <- renderPlotly({
+    # Plot the mean number of homelessness decisions per year across all local authorities
+    mean_data <- melted_data %>%
+      group_by(Year) %>%
+      summarize(Mean = mean(`Homelessness Decisions`, na.rm = TRUE))
+    
+    p <- ggplot(mean_data, aes(x = Year, y = Mean)) +
+      geom_line() +
+      geom_point() +
+      ggtitle("Mean Number of Homelessness Decisions per Year") +
+      theme_minimal()
+    
+    # Convert ggplot object to a plotly object
+    ggplotly(p)
+  })
+  
+  output$homelessnessVsPropertyPricesPlot <- renderPlotly({
+    # Extract year from deed_date
+    house_sale$year <- format(house_sale$deed_date, "%Y")
+    
+    # Calculate average price by year
+    avg_price_by_year <- aggregate(price_paid ~ year, data=house_sale, FUN=mean)
+    avg_price_by_year$year <- as.numeric(avg_price_by_year$year)
+    
+    # Calculate the mean homelessness decisions per year
+    mean_homelessness_by_year <- melted_data %>%
+      group_by(Year) %>%
+      summarize(Mean = mean(`Homelessness Decisions`, na.rm = TRUE))
+    
+    # Combine the datasets based on year
+    combined_data <- left_join(mean_homelessness_by_year, avg_price_by_year, by = c("Year" = "year"))
+    
+    # Create a basic plot with homelessness decisions
+    p <- plot_ly(combined_data, x = ~Year, y = ~Mean, type = 'scatter', mode = 'lines+markers', name = 'Homelessness Decisions', line = list(color = 'blue'))
+    
+    # Add the property prices as a secondary y-axis
+    p <- p %>% add_trace(y = ~price_paid, name = 'Average Property Price', line = list(color = 'red')) %>%
+      layout(yaxis2 = list(overlaying = "y", side = "right"))
+    
+    return(p)
   })
   
 }
