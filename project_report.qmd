@@ -35,7 +35,10 @@ Various charities, NGOs, and local councils work tirelessly to provide shelter, 
 In this report, we analyze data related to homelessness decisions in UK from 2009 to 2018 and local authority homelessness decisions in 2023 based on various factors and also give some information on prediction of homelessness. The analysis is based on datasets from reputable sources including local authority reports and property price data.
 
 ::: {.cell .r .hidden-code}
-```{r, echo=FALSE, warning=FALSE,message=FALSE}
+```{r}
+#| message: false
+#| warning: false
+
 # Load required libraries
 library(shiny)
 library(ggplot2)
@@ -44,6 +47,7 @@ library(tidyr)
 library(readxl)
 library(plotly)
 library(stats)
+library(gridExtra)
 
 # Load and process the trend dataset
 data <- read_excel("PE1_2009-2018.xlsx")
@@ -120,4 +124,29 @@ avg_price_by_year <- aggregate(price_paid ~ year, data=house_sale, FUN=mean)
 ```
 :::
 
+\newpage
+
+# Data visualisation of homelessness decisions of specific authority
+
+```{r}
+plot_specific_authority <- function(authority, data) {
+  authority_data <- data %>% filter(`Local authority area` == authority)
+  
+  plot <- ggplot(authority_data, aes(x = Year, y = `Homelessness Decisions`)) +
+    geom_line() + 
+    geom_point() +
+    ggtitle(paste("Homelessness Decisions in", authority)) +
+    xlab("Year") +
+    ylab("Number of Homelessness Decisions") +
+    theme_minimal()
+  
+  return(plot)
+}
+
+# Plots for specific local authorities (replace 'melted_data' with your data frame name)
+plot_specific_authority("Walsall", melted_data)
+plot_specific_authority("Dudley", melted_data)
+plot_specific_authority("Sandwell", melted_data)
+plot_specific_authority("Wolverhampton", melted_data)
+```
 
