@@ -4,6 +4,7 @@ library(dplyr)
 library(tidyr)
 library(readxl)
 library(plotly)
+library(stats)
 
 # Load and process the dataset
 data <- read_excel("PE1_2009-2018.xlsx")
@@ -23,15 +24,28 @@ la_total <- read_excel("detailed_LA_23_total.xlsx", sheet = 1)
 traditional_regions <- c("North East", "North West", "Yorkshire and the Humber", "East Midlands", 
                          "West Midlands", "East of England", "London", "South East", "South West")
 la_total_geo <- la_total[la_total$Area %in% traditional_regions, ]
+la_total_geo$Initial_assessment <- as.numeric(la_total_geo$Initial_assessment)
+la_total_geo$Prevention_duty <- as.numeric(la_total_geo$Prevention_duty)
+la_total_geo$Relief_duty <- as.numeric(la_total_geo$Relief_duty)
 
 # Load Data for Support Needs Analysis
 la_support <- read_excel("detailed_LA_23_total.xlsx", sheet = 2)
 geo_regions_support_needs <- la_support[la_support$Area %in% traditional_regions, ]
+geo_regions_support_needs$household_no_support <- as.numeric(geo_regions_support_needs$household_no_support)
+geo_regions_support_needs$household_unknown_support <- as.numeric(geo_regions_support_needs$household_unknown_support)
 
 la_age <- read_excel("detailed_LA_23_total.xlsx", sheet = 3)
+age_groups <- c("16-17", "18-24", "25-34", "35-44", "45-54", "55-64", "65-74", "75plus")
+for (col in age_groups) {
+  la_age[[col]] <- as.numeric(la_age[[col]])
+}
 geo_regions_age_duty <- la_age[la_age$Area %in% traditional_regions, ]
 
 la_referral <- read_excel("detailed_LA_23_total.xlsx", sheet = 4)
+referral_groups <- c("Adult_secure_estate(prison)", "Youth_secure_estate", "National_probation_service", "Community_rehabilition_company", "Ugent_treatment_centres", "Mental_health", "Jobcentre_plus", "Adult_social_services", "Children_social_services", "Children_early_help", "Nil_resource_team", "State_of_defence", "Unknown", "household_referred_by_agency", "Household_referred_by_local_authority")
+for (col in referral_groups) {
+  la_referral[[col]] <- as.numeric(la_referral[[col]])
+}
 geo_regions_referral_duty <- la_referral[la_referral$Area %in% traditional_regions, ]
 
 get_referral_description <- function(referral) {
@@ -50,15 +64,22 @@ get_referral_description <- function(referral) {
          "State_of_defence" = "Regions with higher referrals from the state of defense may have populations involved in defense services.",
          "Unknown" = "For unknown referrals, the source of the referral wasn't clearly identified.",
          "household_referred_by_agency" = "Regions with more households referred by agencies can provide insights into the involvement of external organizations.",
-         "Household_referred_by_local_authority" = "This shows regions where local authorities have been actively referring households.",
-         "UNKNOWN REFERRAL"
+         "Household_referred_by_local_authority" = "This shows regions where local authorities have been actively referring households."
   )
 }
 
 la_ethnicity <- read_excel("detailed_LA_23_total.xlsx", sheet = 5)
+ethnicity_groups <- c("British", "Irish", "Gypsy", "Other_white", "British_African", "British_Caribbean", "Other_black", "British_pakistani", "British_Indian", "British_Bangladeshi", "British_chinese", "Other_asian", "White_black_caribbean", "White_black_african", "White_asian", "Other_multiple_ethnic_background", "Arab", "Other_ethnic_groups", "Unknown")
+for (col in ethnicity_groups) {
+  la_ethnicity[[col]] <- as.numeric(la_ethnicity[[col]])
+}
 geo_regions_ethnicity_duty <- la_ethnicity[la_ethnicity$Area %in% traditional_regions, ]
 
 la_employment <- read_excel("detailed_LA_23_total.xlsx", sheet = 6)
+employment_groups <- c("Full_time", "Part_time", "Student", "Registered_unemployed", "Not_registered_but_seeking", "Not_seeking", "Not_working_due_to_illness", "Retired", "Other", "Unknown")
+for (col in employment_groups) {
+  la_employment[[col]] <- as.numeric(la_employment[[col]])
+}
 geo_regions_employment_duty <- la_employment[la_employment$Area %in% traditional_regions, ]
 
 house_sale <- read_excel("ppd_data_headers.xlsx")
@@ -241,7 +262,7 @@ ui <- navbarPage("Homelessness Decisions by Local Authority",
                  
                  tabPanel("Homelessness by Age Group",
                           selectInput("ageGroup", "Select Age Group:", 
-                                      choices = c("16-17", "18-24", "25-34", "35-44", "45-54", "55-64", "65-74", "75plus", "not_known")),
+                                      choices = c("16-17", "18-24", "25-34", "35-44", "45-54", "55-64", "65-74", "75plus")),
                           plotOutput("agePlot")
                  ),
                  
@@ -276,8 +297,23 @@ ui <- navbarPage("Homelessness Decisions by Local Authority",
                           textOutput("employmentDescription")
                  ),
                  
+                 tabPanel("Top 5 Local Authorities",
+                          plotOutput("topAuthoritiesPlot")
+                 ),
+                 
                  tabPanel("Property Price vs Homelessness",
-                          plotOutput("priceVsHomelessnessPlot")
+                          plotOutput("priceVsHomelessnessPlot"),
+                          # Add the explanation
+                          tags$br(),  # Just to add some space
+                          h4("Why the Decline in Homelessness Amidst Rising Property Prices?"),
+                          tags$p("As we see a rise in property prices towards the end of our data, there's a noticeable decrease in homelessness. In 2018, a pivotal legislative action, the Homelessness Reduction Act, was enacted."),
+                          tags$ul(
+                            tags$li("Proactive Approach: Early interventions by local councils to curb homelessness."),
+                            tags$li("Extended Support Window: Assistance period for those at risk doubled to 56 days."),
+                            tags$li("Mandatory Referrals: Essential services are now bound to alert housing teams about individuals facing homelessness."),
+                            tags$li("Personalized Plans: Customized housing strategies are developed for every individual in need."),
+                            tags$li("Wider Support Scope: The Act extends its support net, especially targeting single homeless individuals.")
+                          )
                  ),
                  
                  tabPanel("Koopman Theory & Research",
@@ -295,7 +331,7 @@ ui <- navbarPage("Homelessness Decisions by Local Authority",
                             tabPanel("Traditional Approaches",
                                      h2("Regression-based Analysis"),
                                      tags$ul(
-                                       tags$li("Given, at time step (year), we can represent homelessness decisions as a function of year and factors like 'Local Authority Regions'."),
+                                       tags$li("Given, at time step (year), we can represent homelessness decisions as a function of year and factors like 'Local Authority Regions' and 'Homelessness Decisions'."),
                                        tags$li("Regression often makes assumptions about data linearity, homoscedasticity, normality, and independence."),
                                        tags$li("Regression models might ignore the temporal nature of data.")
                                      )
@@ -441,15 +477,6 @@ server <- function(input, output, session) {
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
   })
   
-  output$agePlot <- renderPlot({
-    selected_age <- input$ageGroup
-    
-    ggplot(geo_regions_age_duty, aes(x = Area, y = get(selected_age))) +
-      geom_bar(stat = "identity") +
-      ggtitle(paste("Homelessness for Age", selected_age, "by Geographical Regions")) +
-      theme(axis.text.x = element_text(angle = 45, hjust = 1))
-  })
-  
   output$referralPlot <- renderPlot({
     selected_referral <- input$referralSource
     
@@ -566,6 +593,31 @@ server <- function(input, output, session) {
     
     # Convert ggplot object to a plotly object
     ggplotly(p)
+  })
+  
+  output$topAuthoritiesPlot <- renderPlot({
+    # Calculate the average number of homelessness decisions for each local authority, excluding 'England'
+    averages <- melted_data %>%
+      filter(`Local authority area` != 'ENGLAND') %>%
+      group_by(`Local authority area`) %>%
+      summarize(Average = mean(`Homelessness Decisions`, na.rm = TRUE)) %>%
+      arrange(desc(Average)) %>%
+      head(5)  # Select the top 5
+    
+    # Filter the data for the selected local authorities
+    top_authorities_data <- melted_data %>% 
+      filter(`Local authority area` %in% averages$`Local authority area`)
+    
+    # Create the plot
+    ggplot(top_authorities_data, aes(x = Year, y = `Homelessness Decisions`, color = `Local authority area`)) +
+      geom_line() +
+      geom_point() +
+      ggtitle("Top 5 Local Authorities by Average Number of Homelessness Decisions (Excluding England)") +
+      xlab("Year") +
+      ylab("Number of Homelessness Decisions") +
+      theme_minimal() +
+      theme(legend.position="bottom") +
+      scale_color_discrete(name = "Local Authority")
   })
   
   output$priceVsHomelessnessPlot <- renderPlot({
