@@ -1,0 +1,123 @@
+---
+title: "Homelessness in the UK: An In-depth Analysis"
+author: "Ishita Khanna"
+format: 
+  html:
+    fig-width: 8
+    fig-height: 4
+    code-fold: true
+---
+
+Link to the Shiny app: [ShinyApp](https://ishitakhanna.shinyapps.io/Walsall_Council/])
+
+# Introduction
+
+Homelessness is a pressing issue in the UK, encompassing a range of situations from rough sleeping to living in temporary accommodations. Over the years, the number of people experiencing homelessness has seen fluctuations, influenced by various economic, social, and political factors.
+
+- **Rough Sleeping:** This is the most visible form of homelessness, referring to people who sleep on the streets, in doorways, parks, or other places not meant for habitation.
+- **Temporary Accommodation:** This includes individuals or families living in hostels, B&Bs, or other short-term housing solutions provided by local councils or charities.
+- **Hidden Homelessness:** Refers to people who don’t have a place of their own and stay with friends or family, often moving from one place to another.
+
+**Causes:**
+
+- **Economic Factors:** Unemployment, poverty, and lack of affordable housing are significant contributors.
+- **Social Factors:** Relationship breakdowns, domestic abuse, and health issues, especially mental health, can lead to homelessness.
+- **Systemic Issues:** Gaps in social security benefits, lack of social housing, and other systemic challenges play a role.
+
+**Efforts to Address the Issue:**
+
+Various charities, NGOs, and local councils work tirelessly to provide shelter, food, and support to those affected. Government initiatives aim to reduce and prevent homelessness, but challenges remain. Understanding the trends and patterns of homelessness is crucial for policymakers, social workers, and charities to make informed decisions and bring about positive change.
+
+\newpage
+
+# Data Preparation and Analysis Setup
+
+In this report, we analyze data related to homelessness decisions in UK from 2009 to 2018 and local authority homelessness decisions in 2023 based on various factors and also give some information on prediction of homelessness. The analysis is based on datasets from reputable sources including local authority reports and property price data.
+
+::: {.cell .r .hidden-code}
+```{r, echo=FALSE, warning=FALSE,message=FALSE}
+# Load required libraries
+library(shiny)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(readxl)
+library(plotly)
+library(stats)
+
+# Load and process the trend dataset
+data <- read_excel("PE1_2009-2018.xlsx")
+
+data[grep("^20", names(data))] <- lapply(data[grep("^20", names(data))], as.character)
+
+melted_data <- data %>%
+  pivot_longer(cols = starts_with("20"), names_to = "Year", values_to = "Homelessness Decisions") %>%
+  mutate(
+    Year = as.numeric(substr(Year, 1, 4)),
+    `Homelessness Decisions` = as.numeric(`Homelessness Decisions`)
+  ) %>%
+  replace_na(list(`Homelessness Decisions` = NA))
+  
+total_homelessness_by_year <- aggregate(`Homelessness Decisions` ~ Year, data=melted_data, FUN=sum)
+  
+# Load and process the geographical dataset
+la_total <- read_excel("detailed_LA_23_total.xlsx", sheet = 1)
+traditional_regions <- c("North East", "North West", "Yorkshire and the Humber", "East Midlands", 
+                         "West Midlands", "East of England", "London", "South East", "South West")
+la_total_geo <- la_total[la_total$Area %in% traditional_regions, ]
+la_total_geo$Initial_assessment <- as.numeric(la_total_geo$Initial_assessment)
+la_total_geo$Prevention_duty <- as.numeric(la_total_geo$Prevention_duty)
+la_total_geo$Relief_duty <- as.numeric(la_total_geo$Relief_duty)
+
+# Load and process data for Support Need Analysis
+la_support <- read_excel("detailed_LA_23_total.xlsx", sheet = 2)
+geo_regions_support_needs <- la_support[la_support$Area %in% traditional_regions, ]
+geo_regions_support_needs$household_no_support <- as.numeric(geo_regions_support_needs$household_no_support)
+geo_regions_support_needs$household_unknown_support <- as.numeric(geo_regions_support_needs$household_unknown_support)
+
+# Load and process data for Age_group Analysis
+la_age <- read_excel("detailed_LA_23_total.xlsx", sheet = 3)
+age_groups <- c("16-17", "18-24", "25-34", "35-44", "45-54", "55-64", "65-74", "75plus")
+for (col in age_groups) {
+  la_age[[col]] <- as.numeric(la_age[[col]])
+}
+geo_regions_age_duty <- la_age[la_age$Area %in% traditional_regions, ]
+
+# Load and process data for referral_group Analysis
+la_referral <- read_excel("detailed_LA_23_total.xlsx", sheet = 4)
+referral_groups <- c("Adult_secure_estate(prison)", "Youth_secure_estate", "National_probation_service", "Community_rehabilition_company", "Ugent_treatment_centres", "Mental_health", "Jobcentre_plus", "Adult_social_services", "Children_social_services", "Children_early_help", "Nil_resource_team", "State_of_defence", "Unknown", "household_referred_by_agency", "Household_referred_by_local_authority")
+for (col in referral_groups) {
+  la_referral[[col]] <- as.numeric(la_referral[[col]])
+}
+geo_regions_referral_duty <- la_referral[la_referral$Area %in% traditional_regions, ]
+
+# Load and prepare data for ethnicity_group Analysis
+la_ethnicity <- read_excel("detailed_LA_23_total.xlsx", sheet = 5)
+ethnicity_groups <- c("British", "Irish", "Gypsy", "Other_white", "British_African", "British_Caribbean", "Other_black", "British_pakistani", "British_Indian", "British_Bangladeshi", "British_chinese", "Other_asian", "White_black_caribbean", "White_black_african", "White_asian", "Other_multiple_ethnic_background", "Arab", "Other_ethnic_groups", "Unknown")
+for (col in ethnicity_groups) {
+  la_ethnicity[[col]] <- as.numeric(la_ethnicity[[col]])
+}
+geo_regions_ethnicity_duty <- la_ethnicity[la_ethnicity$Area %in% traditional_regions, ]
+
+# Load and prepare data for employment_group Analysis
+la_employment <- read_excel("detailed_LA_23_total.xlsx", sheet = 6)
+employment_groups <- c("Full_time", "Part_time", "Student", "Registered_unemployed", "Not_registered_but_seeking", "Not_seeking", "Not_working_due_to_illness", "Retired", "Other", "Unknown")
+for (col in employment_groups) {
+  la_employment[[col]] <- as.numeric(la_employment[[col]])
+}
+geo_regions_employment_duty <- la_employment[la_employment$Area %in% traditional_regions, ]
+
+# Load and prepare the price paid dataset
+house_sale <- read_excel("ppd_data_headers.xlsx")
+relevant_columns <- c('unique_id', 'price_paid', 'deed_date', 'postcode', 'property_type', 'new_build', 'estate_type')
+house_sale <- house_sale %>%
+  select(all_of(relevant_columns))
+house_sale <- na.omit(house_sale, cols = "postcode")
+
+house_sale$year <- as.numeric(format(house_sale$deed_date, "%Y"))
+
+avg_price_by_year <- aggregate(price_paid ~ year, data=house_sale, FUN=mean)
+```
+:::
+
+
