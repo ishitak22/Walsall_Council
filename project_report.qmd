@@ -150,3 +150,32 @@ plot_specific_authority("Sandwell", melted_data)
 plot_specific_authority("Wolverhampton", melted_data)
 ```
 
+\newpage
+
+# Initial Assessment by Area
+
+```{r}
+ggplot(la_total_geo, aes(x = Area, y = Initial_assessment)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ggtitle("Initial Assessment by Area")
+```
+
+# Prevention Duty by Area
+
+```{r}
+ggplot(la_total_geo, aes(x = Area, y = Prevention_duty)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ggtitle("Prevention Duty by Area")
+```
+
+# Relief Duty by Area
+
+```{r}
+ggplot(la_total_geo, aes(x = Area, y = Relief_duty)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ggtitle("Relief Duty by Area")
+```
+
