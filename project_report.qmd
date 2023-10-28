@@ -40,7 +40,6 @@ In this report, we analyze data related to homelessness decisions in UK from 200
 #| warning: false
 
 # Load required libraries
-library(shiny)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
@@ -48,6 +47,7 @@ library(readxl)
 library(plotly)
 library(stats)
 library(gridExtra)
+library(reshape2)
 
 # Load and process the trend dataset
 data <- read_excel("PE1_2009-2018.xlsx")
@@ -94,6 +94,23 @@ for (col in referral_groups) {
   la_referral[[col]] <- as.numeric(la_referral[[col]])
 }
 geo_regions_referral_duty <- la_referral[la_referral$Area %in% traditional_regions, ]
+
+get_referral_description <- c("Adult_secure_estate(prison)" = "This indicates which regions have more referrals from prisons, potentially highlighting the need for better reintegration programs.",
+         "Youth_secure_estate" = "This indicates which regions have more referrals from youth secure estates.",
+         "National_probation_service" = "Regions with higher numbers here may require more focused services for individuals on probation.",
+         "Community_rehabilition_company" = "This indicates regions with referrals from community rehabilitation companies.",
+         "Ugent_treatment_centres" = "Referrals from urgent treatment centers indicate regions where immediate medical attention was sought.",
+         "Mental_health" = "This can indicate the regions where mental health services may be most needed.",
+         "Jobcentre_plus" = "This will show which regions have more referrals from employment services, potentially indicating a link between unemployment and homelessness.",
+         "Adult_social_services" = "Regions with higher referrals from adult social services may indicate a need for more comprehensive social care programs.",
+         "Children_social_services" = "Referrals from children's social services highlight regions with potential vulnerabilities among younger populations.",
+         "Children_early_help" = "This indicates regions where early intervention services for children were sought.",
+         "Nil_resource_team" = "Referrals from the Nil resource team can provide insights into specific cases without external resource involvement.",
+         "State_of_defence" = "Regions with higher referrals from the state of defense may have populations involved in defense services.",
+         "Unknown" = "For unknown referrals, the source of the referral wasn't clearly identified.",
+         "household_referred_by_agency" = "Regions with more households referred by agencies can provide insights into the involvement of external organizations.",
+         "Household_referred_by_local_authority" = "This shows regions where local authorities have been actively referring households."
+  )
 
 # Load and prepare data for ethnicity_group Analysis
 la_ethnicity <- read_excel("detailed_LA_23_total.xlsx", sheet = 5)
@@ -179,3 +196,234 @@ ggplot(la_total_geo, aes(x = Area, y = Relief_duty)) +
   ggtitle("Relief Duty by Area")
 ```
 
+\newpage
+
+# Supprt Need Analysis
+
+```{r}
+# Plot for Household with No Support Needs
+plot_no_support <- ggplot(geo_regions_support_needs, aes(x = Area, y = household_no_support)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ggtitle("Household with No Support Needs by Geographical Regions")
+
+# Plot for Household with Unknown Support Needs
+plot_unknown_support <- ggplot(geo_regions_support_needs, aes(x = Area, y = household_unknown_support)) +
+  geom_bar(stat = "identity", fill = "salmon") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ggtitle("Household with Unknown Support Needs by Geographical Regions")
+
+# Arrange the plots side by side
+grid.arrange(plot_no_support, plot_unknown_support, ncol = 2)
+```
+
+\newpage
+
+# Homelessness Analysis by Age Group
+
+```{r}
+# Function to generate faceted plot for all age groups
+plot_all_age_groups <- function(data, age_groups) {
+  # Melt the data to long format for faceting
+  data_long <- reshape2::melt(data, id.vars = "Area", measure.vars = age_groups)
+
+  # Generate faceted plot
+  ggplot(data_long, aes(x = Area, y = value)) +
+    geom_bar(stat = "identity") +
+    facet_wrap(~variable, scales = "free_y") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    ggtitle("Homelessness by Age Groups in Geographical Regions")
+}
+
+data <- geo_regions_age_duty
+
+# Generate the faceted plot
+age_group_plot <- plot_all_age_groups(data, age_groups)
+
+# Display the faceted plot
+print(age_group_plot)
+```
+
+\newpage
+
+# Homelessness Analysis by Referral Sources
+
+<div class="referral-descriptions">
+  <h2>Referral Source Descriptions</h2>
+  <ul>
+    <li><strong>Adult Secure Estate (Prison):</strong> Indicates which regions have more referrals from prisons, potentially highlighting the need for better reintegration programs.</li>
+    <li><strong>Youth Secure Estate:</strong> Indicates which regions have more referrals from youth secure estates.</li>
+    <li><strong>National Probation Service:</strong> Regions with higher numbers here may require more focused services for individuals on probation.</li>
+    <li><strong>Community Rehabilitation Company:</strong> Indicates regions with referrals from community rehabilitation companies.</li>
+    <li><strong>Urgent Treatment Centres:</strong> Referrals from urgent treatment centers indicate regions where immediate medical attention was sought.</li>
+    <li><strong>Mental Health:</strong> Indicates the regions where mental health services may be most needed.</li>
+    <li><strong>Jobcentre Plus:</strong> Shows which regions have more referrals from employment services, potentially indicating a link between unemployment and homelessness.</li>
+    <li><strong>Adult Social Services:</strong> Regions with higher referrals from adult social services may indicate a need for more comprehensive social care programs.</li>
+    <li><strong>Children Social Services:</strong> Referrals from children's social services highlight regions with potential vulnerabilities among younger populations.</li>
+    <li><strong>Children Early Help:</strong> Indicates regions where early intervention services for children were sought.</li>
+    <li><strong>Nil Resource Team:</strong> Referrals from the Nil resource team can provide insights into specific cases without external resource involvement.</li>
+    <li><strong>State of Defence:</strong> Regions with higher referrals from the state of defense may have populations involved in defense services.</li>
+    <li><strong>Unknown:</strong> For unknown referrals, the source of the referral wasn't clearly identified.</li>
+    <li><strong>Household Referred by Agency:</strong> Regions with more households referred by agencies can provide insights into the involvement of external organizations.</li>
+    <li><strong>Household Referred by Local Authority:</strong> Shows regions where local authorities have been actively referring households.</li>
+  </ul>
+</div>
+
+
+```{r}
+# Function to generate faceted plot for all referral sources
+plot_all_referral_sources <- function(data, referral_groups) {
+  # Melt the data to long format for faceting
+  data_long <- melt(data, id.vars = "Area", measure.vars = referral_groups)
+
+
+  # Generate faceted plot
+  p <- ggplot(data_long, aes(x = Area, y = value)) +
+    geom_bar(stat = "identity") +
+    facet_wrap(~variable, scales = "free_y") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    ggtitle("Homelessness Referrals by Sources in Traditional Regions")
+
+  return(p)
+}
+
+data <- geo_regions_referral_duty
+
+# Generate the faceted plot
+referral_source_plot <- plot_all_referral_sources(data, referral_groups)
+
+# Display the faceted plot
+print(referral_source_plot)
+```
+
+\newpage
+
+# Homelessness Analysis based on Ethnicity groups
+
+```{r}
+plot_all_ethnicities <- function(data, ethnicity_groups) {
+  # Melt the data to long format for faceting
+  data_long <- reshape2::melt(data, id.vars = "Area", measure.vars = ethnicity_groups)
+
+  # Generate faceted plot
+  ggplot(data_long, aes(x = Area, y = value)) +
+    geom_bar(stat = "identity") +
+    facet_wrap(~variable, scales = "free_y") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    ggtitle("Homelessness Cases Identifying as Different Ethnicities in Geographical Regions")
+}
+
+data <- geo_regions_ethnicity_duty
+
+# Generate the faceted plot
+ethnicity_plot <- plot_all_ethnicities(data, ethnicity_groups)
+
+# Display the faceted plot
+print(ethnicity_plot)
+```
+
+\newpage
+
+# Homelessness Analysis based on the Employment Groups
+
+<div class="employment-descriptions">
+  <h2>Employment Status Descriptions</h2>
+  <ul>
+    <li><strong>Full Time:</strong> High numbers here could indicate a need for affordable housing or living wage initiatives.</li>
+    <li><strong>Part Time:</strong> High numbers might indicate employment instability as a factor in homelessness.</li>
+    <li><strong>Student:</strong> High number might indicate students who are highly in debt because of their study fees and been homeless because they don't have any source of income.</li>
+    <li><strong>Registered Unemployed:</strong> These regions potentially require job training or employment programs.</li>
+    <li><strong>Not Registered but Seeking:</strong> High number indicates that there is so much difficulty in finding a job that people are homeless because of being unemployed even after getting good quality of education.</li>
+    <li><strong>Not Seeking:</strong> The high count in this category possibly points to other factors like illness or disability as the main issue.</li>
+    <li><strong>Not Working Due to Illness:</strong> High number gives us an idea as to where we need to invest more in terms of healthcare.</li>
+    <li><strong>Retired:</strong> This will show which regions have homelessness cases among retirees.</li>
+  </ul>
+</div>
+
+
+```{r}
+# Function to generate faceted plot for all employment statuses
+plot_all_employment_statuses <- function(data, employment_groups) {
+  # Melt the data to long format for faceting
+  data_long <- reshape2::melt(data, id.vars = "Area", measure.vars = employment_groups)
+
+  # Generate faceted plot
+  ggplot(data_long, aes(x = Area, y = value)) +
+    geom_bar(stat = "identity") +
+    facet_wrap(~variable, scales = "free_y") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    ggtitle("Homelessness by Employment Status in Geographical Regions")
+}
+
+data <- geo_regions_employment_duty
+
+# Generate the faceted plot
+employment_status_plot <- plot_all_employment_statuses(data, employment_groups)
+
+# Display the faceted plot
+print(employment_status_plot)
+```
+
+# Top 10 local authority analysis
+
+```{r}
+# Create a plot for the top 5 local authorities
+top_authorities_data <- melted_data %>% 
+  filter(`Local authority area` %in% 
+           (melted_data %>% 
+              filter(`Local authority area` != 'ENGLAND') %>%
+              group_by(`Local authority area`) %>%
+              summarize(Average = mean(`Homelessness Decisions`, na.rm = TRUE)) %>%
+              arrange(desc(Average)) %>%
+              head(5) %>%  # Select the top 5
+              pull(`Local authority area`)))
+
+p <- ggplot(top_authorities_data, aes(x = Year, y = `Homelessness Decisions`, color = `Local authority area`)) +
+  geom_line() +
+  geom_point() +
+  ggtitle("Top 5 Local Authorities by Average Number of Homelessness Decisions (Excluding England)") +
+  xlab("Year") +
+  ylab("Number of Homelessness Decisions") +
+  theme_minimal() +
+  theme(legend.position="bottom")
+
+# Display the plot
+print(p)
+```
+
+# Average homelessness trend
+
+```{r mean-homelessness-plot, fig.cap="Mean Number of Homelessness Decisions per Year"}
+# Plot the mean number of homelessness decisions per year across all local authorities
+mean_data <- melted_data %>%
+  group_by(Year) %>%
+  summarize(Mean = mean(`Homelessness Decisions`, na.rm = TRUE))
+
+p <- ggplot(mean_data, aes(x = Year, y = Mean)) +
+  geom_line() +
+  geom_point() +
+  ggtitle("Mean Number of Homelessness Decisions per Year") +
+  theme_minimal()
+
+# Print the ggplot object
+print(p)
+```
+
+# Price vs homelessness analysis
+
+```{r price-vs-homelessness-plot, fig.cap="Average Property Price vs Total Homelessness by Year"}
+# Join the two datasets
+combined_data <- merge(avg_price_by_year, total_homelessness_by_year, by.x="year", by.y="Year")
+
+# Create the plot
+ggplot(combined_data) +
+  geom_line(aes(x=year, y=price_paid, color="Average Property Price")) +
+  geom_line(aes(x=year, y=`Homelessness Decisions`, color="Total Homelessness Decisions")) +
+  geom_point(aes(x=year, y=price_paid)) +
+  geom_point(aes(x=year, y=`Homelessness Decisions`)) +
+  ggtitle("Average Property Price vs Total Homelessness by Year") +
+  xlab("Year") +
+  ylab("Value") +
+  scale_y_continuous(sec.axis = sec_axis(~., name = "Total Homelessness Decisions")) +
+  theme_minimal()
+```
