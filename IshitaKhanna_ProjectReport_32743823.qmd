@@ -10,6 +10,8 @@ format:
 
 Link to the Shiny app: [ShinyApp](https://ishitakhanna.shinyapps.io/Walsall_Council/)
 
+Link to the github account: [Github](https://github.com/ishitak22/Walsall_Council)
+
 # Abstract
 
 In this report, we analyze data related to homelessness decisions in UK from 2009 to 2018 and local authority homelessness decisions in 2023 based on various factors and also give some information on prediction of homelessness. The analysis is based on data-sets from reputable sources including local authority reports and property price data.
@@ -183,7 +185,6 @@ plot_specific_authority <- function(authority, data) {
   return(plot)
 }
 
-# Plots for specific local authorities (replace 'melted_data' with your data frame name)
 plot_specific_authority("Walsall", melted_data)
 ```
 
@@ -325,19 +326,17 @@ ggplot(la_total_geo, aes(x = Area, y = Relief_duty, fill = Area)) +
 #| label: fig-support
 #| fig-cap: "Support Need Analysis"
 #| warning: false
-# Plot for Household with No Support Needs
+
 plot_no_support <- ggplot(geo_regions_support_needs, aes(x = Area, y = household_no_support)) +
   geom_bar(stat = "identity", fill = "skyblue") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   ggtitle("Household with No Support Needs by Geographical Regions")
 
-# Plot for Household with Unknown Support Needs
 plot_unknown_support <- ggplot(geo_regions_support_needs, aes(x = Area, y = household_unknown_support)) +
   geom_bar(stat = "identity", fill = "salmon") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   ggtitle("Household with Unknown Support Needs by Geographical Regions")
 
-# Arrange the plots side by side
 grid.arrange(plot_no_support, plot_unknown_support, ncol = 2)
 ```
 
@@ -356,12 +355,9 @@ grid.arrange(plot_no_support, plot_unknown_support, ncol = 2)
 #| label: fig-age
 #| fig-cap: "Analysis based on age groups"
 #| warning: false
-# Define a function to generate the faceted plot
 plot_all_age_groups <- function(data, age_groups) {
-  # Melt the data to long format for faceting
   data_long <- reshape2::melt(data, id.vars = "Area", measure.vars = age_groups)
 
-  # Generate the faceted plot
   ggplot(data_long, aes(x = Area, y = value, fill = Area)) +
     geom_bar(stat = "identity", color = "black") +
     facet_wrap(~variable, scales = "free_y") +
@@ -375,10 +371,8 @@ plot_all_age_groups <- function(data, age_groups) {
     labs(fill = "Geographical Region")  
 }
 
-# Provide the data and age_groups to the function
 data <- geo_regions_age_duty
 
-# Generate and display the faceted plot
 age_group_plot <- plot_all_age_groups(data, age_groups)
 age_group_plot
 ```
@@ -419,12 +413,9 @@ age_group_plot
 #| label: fig-reference
 #| fig-cap: "Analysis based on reference groups"
 #| warning: false
-# Define a function to generate the faceted plot
 plot_all_referral_sources <- function(data, referral_groups) {
-  # Melt the data to long format for faceting
   data_long <- reshape2::melt(data, id.vars = "Area", measure.vars = referral_groups)
 
-  # Generate the faceted plot
   ggplot(data_long, aes(x = Area, y = value, fill = Area)) +
     geom_bar(stat = "identity", color = "black") +
     facet_wrap(~variable, scales = "free_y") +
@@ -438,10 +429,8 @@ plot_all_referral_sources <- function(data, referral_groups) {
     labs(fill = "Traditional Region") 
 }
 
-# Provide the data and referral_groups to the function
 data <- geo_regions_referral_duty
 
-# Generate and display the faceted plot
 referral_source_plot <- plot_all_referral_sources(data, referral_groups)
 referral_source_plot
 ```
@@ -458,9 +447,7 @@ referral_source_plot
 #| label: fig-ethnicity
 #| fig-cap: "Analysis based on ethnicity groups"
 #| warning: false
-# Define a function to generate the faceted plot
 plot_all_ethnicities <- function(data, ethnicity_groups) {
-  # Melt the data to long format for faceting
   data_long <- reshape2::melt(data, id.vars = "Area", measure.vars = ethnicity_groups)
 
   ggplot(data_long, aes(x = Area, y = value, fill = Area)) +
@@ -476,10 +463,8 @@ plot_all_ethnicities <- function(data, ethnicity_groups) {
     labs(fill = "Geographical Region") 
 }
 
-# Provide the data and ethnicity_groups to the function
 data <- geo_regions_ethnicity_duty
 
-# Generate and display the faceted plot
 ethnicity_plot <- plot_all_ethnicities(data, ethnicity_groups)
 ethnicity_plot
 ```
@@ -511,13 +496,9 @@ ethnicity_plot
 #| label: fig-employment
 #| fig-cap: "Analysis of different employment"
 #| warning: false
-# Function to generate faceted plot for all employment statuses
-# Define a function to generate the faceted plot
 plot_all_employment_statuses <- function(data, employment_groups) {
-  # Melt the data to long format for faceting
   data_long <- reshape2::melt(data, id.vars = "Area", measure.vars = employment_groups)
-
-  # Generate the faceted plot
+  
   ggplot(data_long, aes(x = Area, y = value, fill = Area)) +
     geom_bar(stat = "identity", color = "black") +
     facet_wrap(~variable, scales = "free_y") +
@@ -531,10 +512,8 @@ plot_all_employment_statuses <- function(data, employment_groups) {
     labs(fill = "Geographical Region")  
 }
 
-# Provide the data and employment_groups to the function
 data <- geo_regions_employment_duty
 
-# Generate and display the faceted plot
 employment_status_plot <- plot_all_employment_statuses(data, employment_groups)
 employment_status_plot
 ```
@@ -547,7 +526,6 @@ employment_status_plot
 #| label: fig-top
 #| fig-cap: "Trend Analysis for the top 5 local authorities"
 #| warning: false
-# Create a plot for the top 5 local authorities
 top_authorities_data <- melted_data %>% 
   filter(`Local authority area` %in% 
            (melted_data %>% 
@@ -555,7 +533,7 @@ top_authorities_data <- melted_data %>%
               group_by(`Local authority area`) %>%
               summarize(Average = mean(`Homelessness Decisions`, na.rm = TRUE)) %>%
               arrange(desc(Average)) %>%
-              head(5) %>%  # Select the top 5
+              head(5) %>% 
               pull(`Local authority area`)))
 
 p <- ggplot(top_authorities_data, aes(x = Year, y = `Homelessness Decisions`, color = `Local authority area`)) +
@@ -567,7 +545,6 @@ p <- ggplot(top_authorities_data, aes(x = Year, y = `Homelessness Decisions`, co
   theme_minimal() +
   theme(legend.position="bottom")
 
-# Display the plot
 print(p)
 ```
 
@@ -592,7 +569,6 @@ According to the project officials, <mark style="background-color: yellow;">Birm
 #| label: fig-average
 #| fig-cap: "Average homelessness trend"
 #| warning: false
-# Plot the mean number of homelessness decisions per year across all local authorities
 mean_data <- melted_data %>%
   group_by(Year) %>%
   summarize(Mean = mean(`Homelessness Decisions`, na.rm = TRUE))
@@ -603,7 +579,6 @@ p <- ggplot(mean_data, aes(x = Year, y = Mean)) +
   ggtitle("Mean Number of Homelessness Decisions per Year") +
   theme_minimal()
 
-# Print the ggplot object
 print(p)
 ```
 
@@ -617,10 +592,8 @@ print(p)
 #| label: fig-comparison
 #| fig-cap: "Comparison between House Pricing and Homelessness"
 #| warning: false
-# Join the two data-sets
 combined_data <- merge(avg_price_by_year, total_homelessness_by_year, by.x="year", by.y="Year")
 
-# Create the plot
 ggplot(combined_data) +
   geom_line(aes(x=year, y=price_paid, color="Average Property Price")) +
   geom_line(aes(x=year, y=`Homelessness Decisions`, color="Total Homelessness Decisions")) +
