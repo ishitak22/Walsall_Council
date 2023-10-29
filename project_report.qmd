@@ -32,11 +32,11 @@ Various charities, NGOs, and local councils work tirelessly to provide shelter, 
 
 # Data Preparation and Analysis Setup
 
-In this report, we analyze data related to homelessness decisions in UK from 2009 to 2018 and local authority homelessness decisions in 2023 based on various factors and also give some information on prediction of homelessness. The analysis is based on datasets from reputable sources including local authority reports and property price data.
+In this report, we analyze data related to homelessness decisions in UK from 2009 to 2018 and local authority homelessness decisions in 2023 based on various factors and also give some information on prediction of homelessness. The analysis is based on data-sets from reputable sources including local authority reports and property price data.
 
 **What is homelessness decisions?**
 
- - The homelessness decisions refers to the number of individual or number of households that are Homeless in a particular local authority or traditional areas.
+ - The <mark style="background-color: yellow;">homelessness decisions</mark> refers to the number of individual or number of households that are Homeless in a particular local authority or traditional areas.
 
 ::: {.cell .r .hidden-code}
 ```{r}
@@ -145,8 +145,6 @@ avg_price_by_year <- aggregate(price_paid ~ year, data=house_sale, FUN=mean)
 ```
 :::
 
-\newpage
-
  *Homelessness is more than just a statistic; it's a pressing societal concern that demands our collective awareness and action. So, let's begin our exploration of this important topic by examining its different facets and the underlying causes.*
 
 ## Data visualisation of homelessness decisions of specific authority
@@ -164,6 +162,9 @@ In this report, we have chosen to analyze trends and data from the local authori
 **4. Stakeholder Alignment:** Focusing on these specific authorities aligns with the objectives and interests of the Walsall Council, which seeks to gain a deeper understanding of regional trends and policy impacts within the Black Country. The chosen approach reflects our commitment to delivering results that directly address the organization's needs and concerns.
 
 ```{r}
+#| label: fig-walsall
+#| fig-cap: "Walsall Trend"
+#| warning: false 
 plot_specific_authority <- function(authority, data) {
   authority_data <- data %>% filter(`Local authority area` == authority)
   
@@ -187,14 +188,20 @@ plot_specific_authority("Walsall", melted_data)
  - We observe an initial sharp decline in homelessness in Walsall. This could be attributed to rapid improvements in conditions, such as the implementation of effective housing policies, increased job opportunities, or more robust social welfare programs. Following this, we witness a relatively stable period with minor fluctuations, suggesting steady conditions. However, in recent times, we notice a gradual increase, possibly due to worsening economic conditions, rising housing costs, or a decrease in the effectiveness of social programs.
 
 ```{r}
+#| label: fig-dudley
+#| fig-cap: "Dudley Trend"
+#| warning: false
 plot_specific_authority("Dudley", melted_data)
 ```
 
  **Dudley**
  
- - Dudley presents a unique trend with an initial decrease in homelessness, followed by remarkable stability. It's important to note that the initial decrease may be misleading, as it may be due to underreporting rather than actual improvement in conditions. After the increase, we see a return to the baseline, indicating a level of stability in homelessness, with the exception of the unrecorded period.
+ - Dudley presents a unique trend with an initial decrease in homelessness, followed by remarkable stability. It's important to note that the initial decrease may be misleading, as it may be due to under-reporting rather than actual improvement in conditions. After the increase, we see a return to the baseline, indicating a level of stability in homelessness, with the exception of the unrecorded period.
 
 ```{r}
+#| label: fig-sandwell
+#| fig-cap: "Sandwell Trend"
+#| warning: false
 plot_specific_authority("Sandwell", melted_data)
 ```
 
@@ -203,6 +210,9 @@ plot_specific_authority("Sandwell", melted_data)
  - In Sandwell, an initial decline in homelessness suggests that policies or economic conditions were improving, leading to a reduction in homelessness. However, there's a sharp increase in homelessness, indicating a potential economic crisis, policy changes, or a surge in housing costs.
 
 ```{r}
+#| label: fig-wolverhampton
+#| fig-cap: "Wolverhampton Trend"
+#| warning: false
 plot_specific_authority("Wolverhampton", melted_data)
 ```
 
@@ -210,7 +220,7 @@ plot_specific_authority("Wolverhampton", melted_data)
  
  - Wolverhampton shows a trend of initial decrease in homelessness, reflecting improving conditions for vulnerable populations. Toward the end of the period, there's a slight increase in homelessness, hinting at potential deterioration in conditions.
 
-\newpage
+**Analysis Explanation**
 
  In our report, we have chosen to focus on the traditional regions of "North East," "North West," "Yorkshire and the Humber," "East Midlands," "West Midlands," "East of England," "London," "South East," and "South West." These regions were selected based on their geographic diversity, population density, economic significance, cultural and social diversity, accessibility to data, historical and policy relevance, and stakeholder interests. This selection allows us to provide a well-rounded analysis that aligns with the objectives of our study.
 
@@ -220,10 +230,15 @@ plot_specific_authority("Wolverhampton", melted_data)
 #| label: total_homelessness
 #| fig-cap: "Homelessness in 8 traditional areas"
 #| warning: false
-ggplot(la_total_geo, aes(x = Area, y = Initial_assessment)) +
-  geom_bar(stat = "identity") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  ggtitle("Initial Assessment by Area")
+ggplot(la_total_geo, aes(x = Area, y = Initial_assessment, fill = Area)) +
+  geom_bar(stat = "identity", color = "black") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10)) +
+  ggtitle("Initial Assessment by Area", subtitle = "Analyzing Initial Assessment Across Regions") +
+  xlab("Area") +
+  ylab("Initial Assessment Count") +
+  scale_fill_brewer(palette = "Set2") +  
+  labs(fill = "Area")
 ```
 
  - As London being the most populated area, it will mostly be having a lot of homelessness.
@@ -265,10 +280,18 @@ In contrast, **relief duty** is a reactive approach that focuses on addressing t
 ## Prevention Duty by Area
 
 ```{r}
-ggplot(la_total_geo, aes(x = Area, y = Prevention_duty)) +
-  geom_bar(stat = "identity") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  ggtitle("Prevention Duty by Area")
+#| label: fig-prevention
+#| fig-cap: "Prevention Duty"
+#| warning: false
+ggplot(la_total_geo, aes(x = Area, y = Prevention_duty, fill = Area)) +
+  geom_bar(stat = "identity", color = "black") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10)) +
+  ggtitle("Prevention Duty by Area", subtitle = "Analyzing Prevention Duty Across Regions") +
+  xlab("Area") +
+  ylab("Prevention Duty Count") +
+  scale_fill_brewer(palette = "Set2") +  
+  labs(fill = "Area")
 ```
 
  A high number of households with prevention duty in the **South East** after London suggests that the region's homelessness prevention services are actively identifying and assisting individuals or families facing housing instability. It's a positive sign that measures are in place to proactively address the risk of homelessness and support those in need, potentially reducing the overall number of people experiencing homelessness in the area.
@@ -276,19 +299,28 @@ ggplot(la_total_geo, aes(x = Area, y = Prevention_duty)) +
 ## Relief Duty by Area
 
 ```{r}
-ggplot(la_total_geo, aes(x = Area, y = Relief_duty)) +
-  geom_bar(stat = "identity") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  ggtitle("Relief Duty by Area")
+#| label: fig-relief
+#| fig-cap: "Relief Duty"
+#| warning: false
+ggplot(la_total_geo, aes(x = Area, y = Relief_duty, fill = Area)) +
+  geom_bar(stat = "identity", color = "black") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10)) +
+  ggtitle("Relief Duty by Area", subtitle = "Comparing Relief Duty Across Regions") +
+  xlab("Area") +
+  ylab("Relief Duty Count") +
+  scale_fill_brewer(palette = "Set2") +  
+  labs(fill = "Area")
 ```
 
  A high number of households with relief duty in the **North West** after London suggests that the region's homelessness support services are actively addressing the immediate needs of individuals and families who are already homeless. This indicates a strong commitment to providing emergency shelter, rehousing assistance, and support services to those in crisis, aiming to help them transition out of homelessness and regain housing stability.
 
-\newpage
-
-## Supprt Need Analysis
+## Support Need Analysis
 
 ```{r}
+#| label: fig-support
+#| fig-cap: "Support Need Analysis"
+#| warning: false
 # Plot for Household with No Support Needs
 plot_no_support <- ggplot(geo_regions_support_needs, aes(x = Area, y = household_no_support)) +
   geom_bar(stat = "identity", fill = "skyblue") +
@@ -313,41 +345,45 @@ grid.arrange(plot_no_support, plot_unknown_support, ncol = 2)
 
  This refers to households for which local authorities or service providers have not been able to determine whether there are any additional support needs. This can be due to a lack of comprehensive assessment, non-disclosure by the household, or other barriers that prevent a clear understanding of the household's situation.
 
-\newpage
 
 ## Homelessness Analysis by Age Group
 
 ```{r}
-#| label: age_analysis
+#| label: fig-age
 #| fig-cap: "Analysis based on age groups"
 #| warning: false
-# Function to generate faceted plot for all age groups
+# Define a function to generate the faceted plot
 plot_all_age_groups <- function(data, age_groups) {
   # Melt the data to long format for faceting
   data_long <- reshape2::melt(data, id.vars = "Area", measure.vars = age_groups)
 
-  # Generate faceted plot
-  ggplot(data_long, aes(x = Area, y = value)) +
-    geom_bar(stat = "identity") +
+  # Generate the faceted plot
+  ggplot(data_long, aes(x = Area, y = value, fill = Area)) +
+    geom_bar(stat = "identity", color = "black") +
     facet_wrap(~variable, scales = "free_y") +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    ggtitle("Homelessness by Age Groups in Geographical Regions")
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10)) +
+    ggtitle("Homelessness by Age Groups in Geographical Regions", 
+             subtitle = "Comparing Age Group Distribution Across Regions") +
+    xlab("Geographical Region") +
+    ylab("Homelessness Count") +
+    scale_fill_brewer(palette = "Set2") +  
+    labs(fill = "Geographical Region")  
 }
 
+# Provide the data and age_groups to the function
 data <- geo_regions_age_duty
 
-# Generate the faceted plot
+# Generate and display the faceted plot
 age_group_plot <- plot_all_age_groups(data, age_groups)
-
-# Display the faceted plot
-print(age_group_plot)
+age_group_plot
 ```
 
  - The observation that the North East has remarkably low numbers of homeless individuals in each age group is an encouraging sign of effective homelessness prevention and support efforts in the region. It suggests that the region has been successful in proactively addressing the risk of homelessness across various age groups, resulting in lower overall homelessness rates.
 
  - The fact that the age group 16-17 is distributed across various areas indicates a dispersion of younger homeless individuals in different parts of the North East. This dispersion could be due to a variety of factors, including family dynamics, educational opportunities, and the availability of support services.
  
- - South East and South West shows a high number of homelessness in age 75 plus. This could be due to lack of adequate care facilities or support systems. There can be possible migration patterns like some elderly moving to these regions for retirement but face unforseen challenges. 
+ - South East and South West shows a high number of homelessness in age 75 plus. This could be due to lack of adequate care facilities or support systems. There can be possible migration patterns like some elderly moving to these regions for retirement but face unforeseen challenges. 
 
 \newpage
 
@@ -376,29 +412,34 @@ print(age_group_plot)
 
 
 ```{r}
-# Function to generate faceted plot for all referral sources
+#| label: fig-reference
+#| fig-cap: "Analysis based on reference groups"
+#| warning: false
+# Define a function to generate the faceted plot
 plot_all_referral_sources <- function(data, referral_groups) {
   # Melt the data to long format for faceting
-  data_long <- melt(data, id.vars = "Area", measure.vars = referral_groups)
+  data_long <- reshape2::melt(data, id.vars = "Area", measure.vars = referral_groups)
 
-
-  # Generate faceted plot
-  p <- ggplot(data_long, aes(x = Area, y = value)) +
-    geom_bar(stat = "identity") +
+  # Generate the faceted plot
+  ggplot(data_long, aes(x = Area, y = value, fill = Area)) +
+    geom_bar(stat = "identity", color = "black") +
     facet_wrap(~variable, scales = "free_y") +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    ggtitle("Homelessness Referrals by Sources in Traditional Regions")
-
-  return(p)
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10)) +
+    ggtitle("Homelessness Referrals by Sources in Traditional Regions", 
+             subtitle = "Comparing Referral Sources Across Regions") +
+    xlab("Traditional Region") +
+    ylab("Referral Count") +
+    scale_fill_brewer(palette = "Set2") +  
+    labs(fill = "Traditional Region") 
 }
 
+# Provide the data and referral_groups to the function
 data <- geo_regions_referral_duty
 
-# Generate the faceted plot
+# Generate and display the faceted plot
 referral_source_plot <- plot_all_referral_sources(data, referral_groups)
-
-# Display the faceted plot
-print(referral_source_plot)
+referral_source_plot
 ```
 
  - We can see State of Defence has not given any referrals for the homelessness. The State of Defence or the defense department of a country typically focuses on matters related to national security, military defense, and foreign policy. Homelessness, on the other hand, is a social and economic issue that primarily falls under the purview of different government departments or agencies, such as housing, social services, or community development, depending on the country's administrative structure.
@@ -410,25 +451,33 @@ print(referral_source_plot)
 ## Homelessness Analysis based on Ethnicity groups
 
 ```{r}
+#| label: fig-ethnicity
+#| fig-cap: "Analysis based on ethnicity groups"
+#| warning: false
+# Define a function to generate the faceted plot
 plot_all_ethnicities <- function(data, ethnicity_groups) {
   # Melt the data to long format for faceting
   data_long <- reshape2::melt(data, id.vars = "Area", measure.vars = ethnicity_groups)
 
-  # Generate faceted plot
-  ggplot(data_long, aes(x = Area, y = value)) +
-    geom_bar(stat = "identity") +
+  ggplot(data_long, aes(x = Area, y = value, fill = Area)) +
+    geom_bar(stat = "identity", color = "black") +
     facet_wrap(~variable, scales = "free_y") +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    ggtitle("Homelessness Cases Identifying as Different Ethnicities in Geographical Regions")
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10)) +
+    ggtitle("Homelessness Cases Identifying as Different Ethnicities in Geographical Regions", 
+             subtitle = "Comparing Ethnicity Distribution Across Regions") +
+    xlab("Geographical Region") +
+    ylab("Homelessness Count") +
+    scale_fill_brewer(palette = "Set2") +  
+    labs(fill = "Geographical Region") 
 }
 
+# Provide the data and ethnicity_groups to the function
 data <- geo_regions_ethnicity_duty
 
-# Generate the faceted plot
+# Generate and display the faceted plot
 ethnicity_plot <- plot_all_ethnicities(data, ethnicity_groups)
-
-# Display the faceted plot
-print(ethnicity_plot)
+ethnicity_plot
 ```
 
  The presence of a high number of individuals of **British** ethnicity experiencing homelessness in the UK is influenced by broader social and economic factors rather than the UK's status as a "British-dominant" country. Homelessness is a complex issue that can affect people from all backgrounds, and it is primarily driven by economic disparities, housing affordability, and individual circumstances. While the UK has a diverse population, homelessness is a societal challenge that transcends ethnicity and is rooted in a combination of factors related to housing, employment, mental health, addiction, and social support systems.
@@ -455,36 +504,45 @@ print(ethnicity_plot)
 
 
 ```{r}
-#| label: employment_analysis
+#| label: fig-employment
 #| fig-cap: "Analysis of different employment"
 #| warning: false
 # Function to generate faceted plot for all employment statuses
+# Define a function to generate the faceted plot
 plot_all_employment_statuses <- function(data, employment_groups) {
   # Melt the data to long format for faceting
   data_long <- reshape2::melt(data, id.vars = "Area", measure.vars = employment_groups)
 
-  # Generate faceted plot
-  ggplot(data_long, aes(x = Area, y = value)) +
-    geom_bar(stat = "identity") +
+  # Generate the faceted plot
+  ggplot(data_long, aes(x = Area, y = value, fill = Area)) +
+    geom_bar(stat = "identity", color = "black") +
     facet_wrap(~variable, scales = "free_y") +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    ggtitle("Homelessness by Employment Status in Geographical Regions")
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10)) +
+    ggtitle("Homelessness by Employment Status in Geographical Regions", 
+             subtitle = "Comparing Employment Status Across Regions") +
+    xlab("Geographical Region") +
+    ylab("Homelessness Count") +
+    scale_fill_brewer(palette = "Set2") + 
+    labs(fill = "Geographical Region")  
 }
 
+# Provide the data and employment_groups to the function
 data <- geo_regions_employment_duty
 
-# Generate the faceted plot
+# Generate and display the faceted plot
 employment_status_plot <- plot_all_employment_statuses(data, employment_groups)
-
-# Display the faceted plot
-print(employment_status_plot)
+employment_status_plot
 ```
 
- As observed in @Age_analysis, there are a lot number of homeless of age groups 18-24 in North West and as we can see in @employment_analysis there are a lot of students who are homeless in North West area. This can be a reason because most of the students are studying or doing temporary part-time jobs that doesn't give job security and many shifts.
+ As observed in @fig-age, there are a lot number of homeless of age groups 18-24 in North West and as we can see in @fig-employment there are a lot of students who are homeless in North West area. This can be a reason because most of the students are studying or doing temporary part-time jobs that doesn't give job security and many shifts.
 
 ## Top 5 local authority analysis
 
 ```{r}
+#| label: fig-top
+#| fig-cap: "Trend Analysis for the top 5 local authorities"
+#| warning: false
 # Create a plot for the top 5 local authorities
 top_authorities_data <- melted_data %>% 
   filter(`Local authority area` %in% 
@@ -526,7 +584,10 @@ According to the project officials, Birmingham as the highest for average homele
 
 ## Average homelessness trend
 
-```{r mean-homelessness-plot, fig.cap="Mean Number of Homelessness Decisions per Year"}
+```{r}
+#| label: fig-average
+#| fig-cap: "Average homelessness trend"
+#| warning: false
 # Plot the mean number of homelessness decisions per year across all local authorities
 mean_data <- melted_data %>%
   group_by(Year) %>%
@@ -548,8 +609,11 @@ print(p)
 
 ## Price vs homelessness analysis
 
-```{r price-vs-homelessness-plot, fig.cap="Average Property Price vs Total Homelessness by Year"}
-# Join the two datasets
+```{r}
+#| label: fig-comparison
+#| fig-cap: "Comparison between House Pricing and Homelessness"
+#| warning: false
+# Join the two data-sets
 combined_data <- merge(avg_price_by_year, total_homelessness_by_year, by.x="year", by.y="Year")
 
 # Create the plot
@@ -606,7 +670,7 @@ This Act's introduction has evidently played a significant role in counteracting
  - **Independence**: Regression assumes that the observations are independent of each other, meaning that the value of the dependent variable for one observation does not depend on the value of the dependent variable for any other observation.
 
 Due to these reasons, we can't use regression analysis for homelessness predictions as the homelessness is affected by various temporal factors and it changes over time. There are multiple assumptions that we discussed that won't account for homelessness data.
-Plus the comphresive data is so challenging to obtain and there were no regular updates in homelessness records. And major factor is homeless data has non linearity in the dataset.
+Plus the comprehensive data is so challenging to obtain and there were no regular updates in homelessness records. And major factor is homeless data has non linearity in the data-set.
 
 ### The Rise of Deep Learning
 
