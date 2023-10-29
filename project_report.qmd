@@ -8,7 +8,7 @@ format:
     code-fold: true
 ---
 
-Link to the Shiny app: [ShinyApp](https://ishitakhanna.shinyapps.io/Walsall_Council/])
+Link to the Shiny app: [ShinyApp](https://ishitakhanna.shinyapps.io/Walsall_Council/)
 
 # Introduction
 
@@ -33,6 +33,10 @@ Various charities, NGOs, and local councils work tirelessly to provide shelter, 
 # Data Preparation and Analysis Setup
 
 In this report, we analyze data related to homelessness decisions in UK from 2009 to 2018 and local authority homelessness decisions in 2023 based on various factors and also give some information on prediction of homelessness. The analysis is based on datasets from reputable sources including local authority reports and property price data.
+
+**What is homelessness decisions?**
+
+ - The homelessness decisions refers to the number of individual or number of households that are Homeless in a particular local authority or traditional areas.
 
 ::: {.cell .r .hidden-code}
 ```{r}
@@ -143,7 +147,21 @@ avg_price_by_year <- aggregate(price_paid ~ year, data=house_sale, FUN=mean)
 
 \newpage
 
-# Data visualisation of homelessness decisions of specific authority
+ *Homelessness is more than just a statistic; it's a pressing societal concern that demands our collective awareness and action. So, let's begin our exploration of this important topic by examining its different facets and the underlying causes.*
+
+## Data visualisation of homelessness decisions of specific authority
+
+ **Rationale for Selection of Local Authorities**
+
+In this report, we have chosen to analyze trends and data from the local authorities of Walsall, Dudley, Sandwell, and Wolverhampton within the West Midlands county. The decision to focus on these specific local authorities is underpinned by the following considerations:
+
+**1. Stakeholder Request:** The project was initiated in collaboration with the Walsall Council, which expressed a particular interest in these four local authorities. Their request was driven by the unique administrative and geographical association of these councils within the Black Country region of the West Midlands.
+
+**2. Geographical and Administrative Cohesion:** These local authorities, being part of the Black Country, exhibit a significant degree of geographical and administrative cohesion. They share common urban characteristics and face similar challenges, making them an ideal group for comparative analysis.
+
+**3. Interconnected Trends:** Exploring trends within Walsall, Dudley, Sandwell, and Wolverhampton allows us to understand how urban policies and developments manifest in a region that is closely interconnected. By comparing and contrasting these local authorities, we can identify similarities and differences that hold valuable insights for local governance.
+
+**4. Stakeholder Alignment:** Focusing on these specific authorities aligns with the objectives and interests of the Walsall Council, which seeks to gain a deeper understanding of regional trends and policy impacts within the Black Country. The chosen approach reflects our commitment to delivering results that directly address the organization's needs and concerns.
 
 ```{r}
 plot_specific_authority <- function(authority, data) {
@@ -162,14 +180,41 @@ plot_specific_authority <- function(authority, data) {
 
 # Plots for specific local authorities (replace 'melted_data' with your data frame name)
 plot_specific_authority("Walsall", melted_data)
+```
+
+ **Walsall**
+ 
+ - We observe an initial sharp decline in homelessness in Walsall. This could be attributed to rapid improvements in conditions, such as the implementation of effective housing policies, increased job opportunities, or more robust social welfare programs. Following this, we witness a relatively stable period with minor fluctuations, suggesting steady conditions. However, in recent times, we notice a gradual increase, possibly due to worsening economic conditions, rising housing costs, or a decrease in the effectiveness of social programs.
+
+```{r}
 plot_specific_authority("Dudley", melted_data)
+```
+
+ **Dudley**
+ 
+ - Dudley presents a unique trend with an initial decrease in homelessness, followed by remarkable stability. It's important to note that the initial decrease may be misleading, as it may be due to underreporting rather than actual improvement in conditions. After the increase, we see a return to the baseline, indicating a level of stability in homelessness, with the exception of the unrecorded period.
+
+```{r}
 plot_specific_authority("Sandwell", melted_data)
+```
+
+ **Sandwell**
+ 
+ - In Sandwell, an initial decline in homelessness suggests that policies or economic conditions were improving, leading to a reduction in homelessness. However, there's a sharp increase in homelessness, indicating a potential economic crisis, policy changes, or a surge in housing costs.
+
+```{r}
 plot_specific_authority("Wolverhampton", melted_data)
 ```
 
+ **Wolverhampton**
+ 
+ - Wolverhampton shows a trend of initial decrease in homelessness, reflecting improving conditions for vulnerable populations. Toward the end of the period, there's a slight increase in homelessness, hinting at potential deterioration in conditions.
+
 \newpage
 
-# Initial Assessment by Area
+ In our report, we have chosen to focus on the traditional regions of "North East," "North West," "Yorkshire and the Humber," "East Midlands," "West Midlands," "East of England," "London," "South East," and "South West." These regions were selected based on their geographic diversity, population density, economic significance, cultural and social diversity, accessibility to data, historical and policy relevance, and stakeholder interests. This selection allows us to provide a well-rounded analysis that aligns with the objectives of our study.
+
+## Initial Assessment by Area
 
 ```{r}
 ggplot(la_total_geo, aes(x = Area, y = Initial_assessment)) +
@@ -178,7 +223,9 @@ ggplot(la_total_geo, aes(x = Area, y = Initial_assessment)) +
   ggtitle("Initial Assessment by Area")
 ```
 
-# Prevention Duty by Area
+
+
+## Prevention Duty by Area
 
 ```{r}
 ggplot(la_total_geo, aes(x = Area, y = Prevention_duty)) +
@@ -187,7 +234,7 @@ ggplot(la_total_geo, aes(x = Area, y = Prevention_duty)) +
   ggtitle("Prevention Duty by Area")
 ```
 
-# Relief Duty by Area
+## Relief Duty by Area
 
 ```{r}
 ggplot(la_total_geo, aes(x = Area, y = Relief_duty)) +
@@ -198,7 +245,7 @@ ggplot(la_total_geo, aes(x = Area, y = Relief_duty)) +
 
 \newpage
 
-# Supprt Need Analysis
+## Supprt Need Analysis
 
 ```{r}
 # Plot for Household with No Support Needs
@@ -219,7 +266,7 @@ grid.arrange(plot_no_support, plot_unknown_support, ncol = 2)
 
 \newpage
 
-# Homelessness Analysis by Age Group
+## Homelessness Analysis by Age Group
 
 ```{r}
 # Function to generate faceted plot for all age groups
@@ -246,7 +293,7 @@ print(age_group_plot)
 
 \newpage
 
-# Homelessness Analysis by Referral Sources
+## Homelessness Analysis by Referral Sources
 
 <div class="referral-descriptions">
   <h2>Referral Source Descriptions</h2>
@@ -298,7 +345,7 @@ print(referral_source_plot)
 
 \newpage
 
-# Homelessness Analysis based on Ethnicity groups
+## Homelessness Analysis based on Ethnicity groups
 
 ```{r}
 plot_all_ethnicities <- function(data, ethnicity_groups) {
@@ -324,7 +371,7 @@ print(ethnicity_plot)
 
 \newpage
 
-# Homelessness Analysis based on the Employment Groups
+## Homelessness Analysis based on the Employment Groups
 
 <div class="employment-descriptions">
   <h2>Employment Status Descriptions</h2>
@@ -364,7 +411,7 @@ employment_status_plot <- plot_all_employment_statuses(data, employment_groups)
 print(employment_status_plot)
 ```
 
-# Top 10 local authority analysis
+## Top 5 local authority analysis
 
 ```{r}
 # Create a plot for the top 5 local authorities
@@ -391,7 +438,7 @@ p <- ggplot(top_authorities_data, aes(x = Year, y = `Homelessness Decisions`, co
 print(p)
 ```
 
-# Average homelessness trend
+## Average homelessness trend
 
 ```{r mean-homelessness-plot, fig.cap="Mean Number of Homelessness Decisions per Year"}
 # Plot the mean number of homelessness decisions per year across all local authorities
@@ -409,7 +456,7 @@ p <- ggplot(mean_data, aes(x = Year, y = Mean)) +
 print(p)
 ```
 
-# Price vs homelessness analysis
+## Price vs homelessness analysis
 
 ```{r price-vs-homelessness-plot, fig.cap="Average Property Price vs Total Homelessness by Year"}
 # Join the two datasets
@@ -427,3 +474,80 @@ ggplot(combined_data) +
   scale_y_continuous(sec.axis = sec_axis(~., name = "Total Homelessness Decisions")) +
   theme_minimal()
 ```
+
+## Koopman Theory and Research
+
+### Why Predict Homelessness?
+
+- Predicting homelessness allows us to focus on prevention.
+- Efficient resource allocation for social services and housing programs.
+- Reduces economic burden on healthcare, emergency services, and the criminal justice system.
+- Positions the UK as a global leader in social policy.
+- Improves lives by ensuring opportunities for stable housing, health, education, and employment.
+
+### Regression-based Analysis
+
+- Given, at time step (year), we can represent homelessness decisions as a function of year and factors like 'Local Authority Regions' and 'Homelessness Decisions'.
+- Regression often makes assumptions about data linearity, homoscedasticity, normality, and independence.
+- Regression models might ignore the temporal nature of data.
+
+### The Rise of Deep Learning
+
+With advancements in computational capabilities and data abundance, neural networks have become state-of-the-art for prediction tasks, including time-series predictions using architectures like RNNs.
+
+### Understanding the Koopman Theory
+
+The discrete mapping between the target variable can be represented as:
+
+$$
+y_{t+1} = F(y_t)
+$$
+
+Where \( F(\cdot) \) is a non-linear function mapping which is usually unknown.
+
+Lifting operation to represent in linear space using an observable function \( \phi(\cdot) \), which gives:
+
+$$
+z_t = \phi(y_t) \in \mathbb{R}^k
+$$
+
+Where \( k \) can be infinite dimensional long.
+
+The mapping can be given using a linear operation:
+
+$$
+z_{t+1} = K z_t
+$$
+
+Where \( K \) is the Koopman Operator.
+
+Finally, for predictions:
+
+$$
+\hat{y}_{t+1} = \phi^{-1}(K \phi(y_t))
+$$
+$$
+\hat{y}_{t+2} = \phi^{-1}(K^2 \phi(y_t))
+$$
+
+And so on...
+
+$$
+\hat{y}_{t+T} = \phi^{-1}(K^T \phi(y_t))
+$$
+
+We can exploit the property of linearity to make multi-time step predictions.
+
+### Neural Network Approach for Koopman
+
+The Koopman Autoencoder (KAE) uses an Encoder and Decoder approach.
+
+![Koopman Autoencoder](www/path_to_KAE_image_from_PDF.png)
+
+### Training the Koopman Autoencoder
+
+Training considers multiple loss functions, including reconstruction loss, linearity loss, and prediction loss.
+
+### Applications of Koopman Autoencoder
+
+![Use-cases of Koopman Autoencoder](www/path_to_SEA_image_from_PDF.png)
