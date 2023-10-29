@@ -741,6 +741,8 @@ Training considers multiple loss functions, including reconstruction loss, linea
 
 ![Use-cases of Koopman Autoencoder](www/path_to_SEA_image_from_PDF.png)
 
+\newpage
+
 # Conclusion
 
 **Highlights of Interesting Results/Findings:**
