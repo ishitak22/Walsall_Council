@@ -217,17 +217,28 @@ plot_specific_authority("Wolverhampton", melted_data)
 ## Initial Assessment by Area
 
 ```{r}
+#| label: total_homelessness
+#| fig-cap: "Homelessness in 8 traditional areas"
+#| warning: false
 ggplot(la_total_geo, aes(x = Area, y = Initial_assessment)) +
   geom_bar(stat = "identity") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   ggtitle("Initial Assessment by Area")
 ```
 
-## Understanding Prevention and Relief Duties in Homelessness Services
+ - As London being the most populated area, it will mostly be having a lot of homelessness.
+ 
+ - We will look at the second highest that is **North West** area.
+ 
+ - The region has significant economic shifts in recent years possibly leading to job losses or wage stagnation.
+ 
+ - The housing market might be less accommodating for low income individuals.
+
+ **Understanding Prevention and Relief Duties in Homelessness Services**
 
 In the realm of homelessness services, a critical component of any comprehensive strategy is a nuanced understanding of prevention and relief duties. These two distinct but interrelated approaches are essential in addressing the complex issue of homelessness. Let's delve into what these terms encompass:
 
- **Prevention Duty**
+### Prevention Duty
 
 **Prevention duty** is a proactive strategy aimed at thwarting homelessness before it takes root. It involves a range of measures, including:
 
@@ -260,6 +271,8 @@ ggplot(la_total_geo, aes(x = Area, y = Prevention_duty)) +
   ggtitle("Prevention Duty by Area")
 ```
 
+ A high number of households with prevention duty in the **South East** after London suggests that the region's homelessness prevention services are actively identifying and assisting individuals or families facing housing instability. It's a positive sign that measures are in place to proactively address the risk of homelessness and support those in need, potentially reducing the overall number of people experiencing homelessness in the area.
+
 ## Relief Duty by Area
 
 ```{r}
@@ -268,6 +281,8 @@ ggplot(la_total_geo, aes(x = Area, y = Relief_duty)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   ggtitle("Relief Duty by Area")
 ```
+
+ A high number of households with relief duty in the **North West** after London suggests that the region's homelessness support services are actively addressing the immediate needs of individuals and families who are already homeless. This indicates a strong commitment to providing emergency shelter, rehousing assistance, and support services to those in crisis, aiming to help them transition out of homelessness and regain housing stability.
 
 \newpage
 
@@ -290,11 +305,22 @@ plot_unknown_support <- ggplot(geo_regions_support_needs, aes(x = Area, y = hous
 grid.arrange(plot_no_support, plot_unknown_support, ncol = 2)
 ```
 
+**Households with no support needs**
+
+ These ar households that despite their housing situation have no identified additional vulnerabilities such as mental health issues, substance misuse, or other factors that might typically warrant additional support. Essentially, their primary need is housing.
+ 
+**Households with unknown support needs**
+
+ This refers to households for which local authorities or service providers have not been able to determine whether there are any additional support needs. This can be due to a lack of comprehensive assessment, non-disclosure by the household, or other barriers that prevent a clear understanding of the household's situation.
+
 \newpage
 
 ## Homelessness Analysis by Age Group
 
 ```{r}
+#| label: age_analysis
+#| fig-cap: "Analysis based on age groups"
+#| warning: false
 # Function to generate faceted plot for all age groups
 plot_all_age_groups <- function(data, age_groups) {
   # Melt the data to long format for faceting
@@ -316,6 +342,12 @@ age_group_plot <- plot_all_age_groups(data, age_groups)
 # Display the faceted plot
 print(age_group_plot)
 ```
+
+ - The observation that the North East has remarkably low numbers of homeless individuals in each age group is an encouraging sign of effective homelessness prevention and support efforts in the region. It suggests that the region has been successful in proactively addressing the risk of homelessness across various age groups, resulting in lower overall homelessness rates.
+
+ - The fact that the age group 16-17 is distributed across various areas indicates a dispersion of younger homeless individuals in different parts of the North East. This dispersion could be due to a variety of factors, including family dynamics, educational opportunities, and the availability of support services.
+ 
+ - South East and South West shows a high number of homelessness in age 75 plus. This could be due to lack of adequate care facilities or support systems. There can be possible migration patterns like some elderly moving to these regions for retirement but face unforseen challenges. 
 
 \newpage
 
@@ -369,6 +401,10 @@ referral_source_plot <- plot_all_referral_sources(data, referral_groups)
 print(referral_source_plot)
 ```
 
+ - We can see State of Defence has not given any referrals for the homelessness. The State of Defence or the defense department of a country typically focuses on matters related to national security, military defense, and foreign policy. Homelessness, on the other hand, is a social and economic issue that primarily falls under the purview of different government departments or agencies, such as housing, social services, or community development, depending on the country's administrative structure.
+ 
+ - Most of the sources have given incomplete information that means they have not reported the number of homelessness in each area. The possible reason for this scenario is that they don't have their companies in every area or they don't have access to homeless details in each region.
+
 \newpage
 
 ## Homelessness Analysis based on Ethnicity groups
@@ -395,6 +431,10 @@ ethnicity_plot <- plot_all_ethnicities(data, ethnicity_groups)
 print(ethnicity_plot)
 ```
 
+ The presence of a high number of individuals of **British** ethnicity experiencing homelessness in the UK is influenced by broader social and economic factors rather than the UK's status as a "British-dominant" country. Homelessness is a complex issue that can affect people from all backgrounds, and it is primarily driven by economic disparities, housing affordability, and individual circumstances. While the UK has a diverse population, homelessness is a societal challenge that transcends ethnicity and is rooted in a combination of factors related to housing, employment, mental health, addiction, and social support systems.
+ 
+ The North East of the UK boasts the lowest homelessness rates for all ethnicity groups, reflecting the region's success in addressing housing instability. Factors contributing to this positive trend include a stable local economy, affordable housing options, strong social services, and robust community support networks. Additionally, the region's demographic composition and local policies may further contribute to lower homelessness rates. This achievement underscores the effectiveness of coordinated efforts to prevent and combat homelessness, benefiting individuals of all backgrounds in the North East.
+
 \newpage
 
 ## Homelessness Analysis based on the Employment Groups
@@ -415,6 +455,9 @@ print(ethnicity_plot)
 
 
 ```{r}
+#| label: employment_analysis
+#| fig-cap: "Analysis of different employment"
+#| warning: false
 # Function to generate faceted plot for all employment statuses
 plot_all_employment_statuses <- function(data, employment_groups) {
   # Melt the data to long format for faceting
@@ -436,6 +479,8 @@ employment_status_plot <- plot_all_employment_statuses(data, employment_groups)
 # Display the faceted plot
 print(employment_status_plot)
 ```
+
+ As observed in @Age_analysis, there are a lot number of homeless of age groups 18-24 in North West and as we can see in @employment_analysis there are a lot of students who are homeless in North West area. This can be a reason because most of the students are studying or doing temporary part-time jobs that doesn't give job security and many shifts.
 
 ## Top 5 local authority analysis
 
@@ -464,6 +509,21 @@ p <- ggplot(top_authorities_data, aes(x = Year, y = `Homelessness Decisions`, co
 print(p)
 ```
 
+According to the project officials, Birmingham as the highest for average homelessness should be ignored due to multiple reasons:
+
+ - **Population Size**: Birmingham is one of the most populous cities in the UK. A larger population often correlates with a higher number of homelessness cases simply due to the sheer number of people living in the area.
+ 
+ - **Economic Factors**: Birmingham has areas of significant deprivation. High unemployment rates, poverty, and a lack of affordable housing can contribute to homelessness.
+ 
+ - **Migration**: As a major city, Birmingham attracts people from surrounding areas and even internationally. Some might come looking for better opportunities but end up homeless due to a variety of reasons, including job scarcity in certain sectors or the inability to secure housing.
+ 
+ - **Services Availability**: Cities like Birmingham often have more services for homeless people compared to rural areas or smaller towns. This can sometimes act as a magnet, drawing in homeless individuals from surrounding areas.
+ - **Housing Market**: The availability of affordable housing can be a significant challenge in larger cities. High demand can drive up rental prices, making it difficult for those with low income or facing economic hardships to secure stable housing.
+ 
+ - **Social Factors**: Larger cities often see a higher incidence of factors that can lead to homelessness, such as family breakdowns, domestic violence, and substance abuse.
+ 
+ - **Visibility**: In larger cities, homelessness might be more visible, especially in central or busy areas. This can sometimes give the impression that the problem is more significant than in areas where homelessness is less visible.
+
 ## Average homelessness trend
 
 ```{r mean-homelessness-plot, fig.cap="Mean Number of Homelessness Decisions per Year"}
@@ -481,6 +541,10 @@ p <- ggplot(mean_data, aes(x = Year, y = Mean)) +
 # Print the ggplot object
 print(p)
 ```
+
+## House price index in each area
+
+![annual house price percentage change](www/price_change.png)
 
 ## Price vs homelessness analysis
 
@@ -501,6 +565,20 @@ ggplot(combined_data) +
   theme_minimal()
 ```
 
+As we see a rise in property prices towards the end of our data, but still there's a noticeable decrease in homelessness. This isn't just a coincidence. In 2018, a pivotal legislative action, the Homelessness Reduction Act, was enacted. Key provisions of this Act include:
+
+• **Proactive Approach**: Early interventions by local councils to curb homelessness.
+
+• **Extended Support Window**: Assistance period for those at risk doubled to 56 days.
+
+• **Mandatory Referrals**: Essential services are now bound to alert housing teams about individuals facing homelessness.
+
+• **Personalized Plans**: Customized housing strategies are developed for every individual in need.
+
+• **Wider Support Scope**: The Act extends its support net, especially targeting single homeless individuals.
+
+This Act's introduction has evidently played a significant role in counteracting the homelessness trend, even as property prices climbed.
+
 ## Koopman Theory and Research
 
 ### Why Predict Homelessness?
@@ -517,11 +595,28 @@ ggplot(combined_data) +
 - Regression often makes assumptions about data linearity, homoscedasticity, normality, and independence.
 - Regression models might ignore the temporal nature of data.
 
+**Let's dive more into the assumptions:**
+
+ - **Linearity**: Regression models assume a linear relationship between the independent variables and the dependent variable (in this case, homelessness).
+ 
+ - **Homoscedasticity**: This term refers to the assumption that the variance of the residuals (the differences between observed and predicted values) is constant across all levels of the independent variables.
+
+ - **Normality**: Regression models often assume that the residuals are normally distributed.
+
+ - **Independence**: Regression assumes that the observations are independent of each other, meaning that the value of the dependent variable for one observation does not depend on the value of the dependent variable for any other observation.
+
+Due to these reasons, we can't use regression analysis for homelessness predictions as the homelessness is affected by various temporal factors and it changes over time. There are multiple assumptions that we discussed that won't account for homelessness data.
+Plus the comphresive data is so challenging to obtain and there were no regular updates in homelessness records. And major factor is homeless data has non linearity in the dataset.
+
 ### The Rise of Deep Learning
 
 With advancements in computational capabilities and data abundance, neural networks have become state-of-the-art for prediction tasks, including time-series predictions using architectures like RNNs.
 
+Deep learning is a subset of machine learning that employs artificial neural networks with multiple layers to automatically learn and understand complex patterns in data.
+
 ### Understanding the Koopman Theory
+
+The Koopman Theory simplifies the complex dynamics of dynamic systems. It uses a Koopman Operator (K) and observable functions (ϕ) to predict future states.
 
 The discrete mapping between the target variable can be represented as:
 
