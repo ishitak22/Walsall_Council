@@ -223,7 +223,33 @@ ggplot(la_total_geo, aes(x = Area, y = Initial_assessment)) +
   ggtitle("Initial Assessment by Area")
 ```
 
+## Understanding Prevention and Relief Duties in Homelessness Services
 
+In the realm of homelessness services, a critical component of any comprehensive strategy is a nuanced understanding of prevention and relief duties. These two distinct but interrelated approaches are essential in addressing the complex issue of homelessness. Let's delve into what these terms encompass:
+
+ **Prevention Duty**
+
+**Prevention duty** is a proactive strategy aimed at thwarting homelessness before it takes root. It involves a range of measures, including:
+
+1. **Counseling and Advice:** Providing individuals at risk of homelessness with vital information about their rights and the available support services. This empowers them to take preventive actions.
+
+2. **Financial Assistance:** Offering financial support or guiding individuals facing housing instability toward available financial resources, thus addressing the financial barriers to stable housing.
+
+3. **Mediation:** Intervening to resolve disputes that have the potential to lead to eviction or homelessness. By facilitating resolution, this duty prevents housing crises.
+
+4. **Housing Support:** Assisting individuals in securing stable housing before they experience the trauma of homelessness. This involves finding suitable accommodation options and ensuring a smooth transition.
+
+### Relief Duty
+
+In contrast, **relief duty** is a reactive approach that focuses on addressing the immediate needs of individuals and families who are already homeless. It encompasses:
+
+1. **Emergency Shelters:** Providing immediate shelter to those in urgent need, ensuring they have a safe place to stay as a first step toward stabilization.
+
+2. **Rehousing:** Assisting homeless individuals or families in finding long-term, stable accommodation, helping them transition out of homelessness and regain their independence.
+
+3. **Support Services:** Offering an array of additional services such as mental health support, addiction counseling, job training, and other support services to address the complex challenges faced by homeless individuals and families.
+
+4. **Collaboration:** Collaborating with other organizations, charities, and housing associations to create a network of support that ensures a comprehensive and holistic approach to relieving homelessness.
 
 ## Prevention Duty by Area
 
