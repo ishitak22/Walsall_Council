@@ -527,74 +527,7 @@ server <- function(input, output, session) {
   output$employmentDescription <- renderText({
     get_employment_description(input$employmentSelection)
   })
-  
-  output$topAuthoritiesPlot <- renderPlotly({
-    # Calculate the average number of homelessness decisions for each local authority, excluding 'England'
-    averages <- melted_data %>%
-      filter(`Local authority area` != 'ENGLAND') %>%
-      group_by(`Local authority area`) %>%
-      summarize(Average = mean(`Homelessness Decisions`, na.rm = TRUE)) %>%
-      arrange(desc(Average)) %>%
-      head(5)  # Select the top 5
-    
-    # Filter the data for the selected local authorities
-    top_authorities_data <- melted_data %>% 
-      filter(`Local authority area` %in% averages$`Local authority area`)
-    
-    # Create the plot
-    p <- ggplot(top_authorities_data, aes(x = Year, y = `Homelessness Decisions`, color = `Local authority area`)) +
-      geom_line() +
-      geom_point(aes(text = paste('Decisions:', `Homelessness Decisions`))) +  # Add text for hover
-      ggtitle("Top 5 Local Authorities by Average Number of Homelessness Decisions (Excluding England)") +
-      xlab("Year") +
-      ylab("Number of Homelessness Decisions") +
-      theme_minimal() +
-      theme(legend.position="bottom") +
-      scale_color_discrete(name = "Local Authority")
-    
-    # Convert ggplot object to a plotly object
-    ggplotly(p, tooltip = "text")
-  })
-  
-  output$facetedAuthoritiesPlot <- renderPlotly({
-    # Create a faceted plot for a subset of local authorities, for example, the top 10
-    top_authorities_data <- melted_data %>% 
-      filter(`Local authority area` %in% 
-               (melted_data %>% 
-                  filter(`Local authority area` != 'ENGLAND') %>%
-                  group_by(`Local authority area`) %>%
-                  summarize(Average = mean(`Homelessness Decisions`, na.rm = TRUE)) %>%
-                  arrange(desc(Average)) %>%
-                  head(10) %>%  # Select the top 10
-                  pull(`Local authority area`)))
-    
-    p <- ggplot(top_authorities_data, aes(x = Year, y = `Homelessness Decisions`)) +
-      geom_line() +
-      geom_point() +
-      facet_wrap(~`Local authority area`, scales = 'free_y') +  # Create a separate facet for each local authority
-      theme_minimal() +
-      theme(axis.text.x = element_text(angle = 45, hjust = 1))
-    
-    # Convert ggplot object to a plotly object
-    ggplotly(p)
-  })
-  
-  output$meanHomelessnessPlot <- renderPlotly({
-    # Plot the mean number of homelessness decisions per year across all local authorities
-    mean_data <- melted_data %>%
-      group_by(Year) %>%
-      summarize(Mean = mean(`Homelessness Decisions`, na.rm = TRUE))
-    
-    p <- ggplot(mean_data, aes(x = Year, y = Mean)) +
-      geom_line() +
-      geom_point() +
-      ggtitle("Mean Number of Homelessness Decisions per Year") +
-      theme_minimal()
-    
-    # Convert ggplot object to a plotly object
-    ggplotly(p)
-  })
-  
+
   output$topAuthoritiesPlot <- renderPlot({
     # Calculate the average number of homelessness decisions for each local authority, excluding 'England'
     averages <- melted_data %>%
@@ -618,6 +551,22 @@ server <- function(input, output, session) {
       theme_minimal() +
       theme(legend.position="bottom") +
       scale_color_discrete(name = "Local Authority")
+  })
+  
+  output$meanHomelessnessPlot <- renderPlotly({
+    # Plot the mean number of homelessness decisions per year across all local authorities
+    mean_data <- melted_data %>%
+      group_by(Year) %>%
+      summarize(Mean = mean(`Homelessness Decisions`, na.rm = TRUE))
+    
+    p <- ggplot(mean_data, aes(x = Year, y = Mean)) +
+      geom_line() +
+      geom_point() +
+      ggtitle("Mean Number of Homelessness Decisions per Year") +
+      theme_minimal()
+    
+    # Convert ggplot object to a plotly object
+    ggplotly(p)
   })
   
   output$priceVsHomelessnessPlot <- renderPlot({
